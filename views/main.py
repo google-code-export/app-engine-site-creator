@@ -31,7 +31,7 @@ import utility
 
 def send_page(page, request):
   """Sends a given page to a user if they have access rights.
-  
+
   Args:
     page: The page to send to the user
     request: The Django request object
@@ -59,15 +59,16 @@ def send_page(page, request):
 
   is_editor = page.user_can_write(profile)
 
-  base_html = '../templates/themes/%s/base.html' % (configuration.SYSTEM_THEME_NAME)
-  page_html = '../templates/themes/%s/page.html' % (configuration.SYSTEM_THEME_NAME)
-  return utility.respond(request, page_html, {'page': page, 'files': files,
-                                              'is_editor': is_editor, 
-                                              'base_html': base_html})
+  if configuration.SYSTEM_THEME_NAME:
+    template = 'themes/%s/page.html' % (configuration.SYSTEM_THEME_NAME)
+
+  return utility.respond(request, template, {'page': page, 'files': files,
+                                             'is_editor': is_editor})
+
 
 def send_file(file_record, request):
   """Sends a given file to a user if they have access rights.
-  
+
   Args:
     file_record: The file to send to the user
     request: The Django request object
@@ -89,6 +90,7 @@ def send_file(file_record, request):
   response['Cache-Control'] = configuration.FILE_CACHE_CONTROL
   response['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
   return response
+
 
 def get_url(request, path_str):
   """Parse the URL and return the requested content to the user.

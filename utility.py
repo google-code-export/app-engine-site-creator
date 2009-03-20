@@ -17,6 +17,7 @@
 
 """Utility methods."""
 
+import functools
 import logging
 import configuration
 
@@ -147,6 +148,21 @@ def clear_memcache():
   """Flushes the memcache when an entry is edited."""
   if not memcache.flush_all():  # pylint: disable-msg=E1101
     logging.error('Failed to clear the cache!')
+
+
+def flush_cache(func):
+  """Decorator to flush the cache."""
+
+  @functools.wraps(func)
+  def wrapper(*args, **kwargs):
+    data = func(*args, **kwargs)
+    logging.info('Flushing the cache')
+    _local_cache.clear()
+    if not memcache.flush_all():
+      logging.error('Memcache flush failed.')
+    return data
+
+  return wrapper
 
 
 def edit_instance(request, model_type, model_form_type,
