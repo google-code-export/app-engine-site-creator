@@ -1,5 +1,6 @@
 {% extends "admin/base.html" %}
 
+{% load i18n %}
 
 {% block includes %}
   <script type="text/javascript"
@@ -38,19 +39,19 @@
 <ul dojoType="dijit.Menu" id="tree_menu" style="display: none;">
   <li dojoType="dijit.MenuItem"
       onClick="window.location.href = '/' + selected_node.item.path;">
-    View
+    {% trans "View" %}
   </li>
   <li dojoType="dijit.MenuItem"
       onClick="window.location.href = selected_node.item.edit_url;">
-    Edit
+    {% trans "Edit" %}
   </li>
   <li dojoType="dijit.MenuItem"
       onClick="window.location.href = selected_node.item.child_url;">
-      Add child
+      {% trans "Add child" %}
   </li>
   <li dojoType="dijit.MenuItem"
       onClick="dijit.byId('delete_dialog').show()">
-    Delete
+    {% trans "Delete" %}
   </li>
 </ul>
 
@@ -58,15 +59,15 @@
      execute="window.location.href = selected_node.item.delete_url;"
      style="display: none;">
   <div>
-    Are you sure you want to delete
+    {% trans "Are you sure you want to delete" %}
     &quot;<span id="delete_dialog_page_name"></span>&quot;
-    and all its children?
+    {% trans "and all its children?" %}
   </div>
   <div style="text-align: center; margin-top: 10px">
     <button dojoType="dijit.form.Button" type="submit">Delete</button>
     <button dojoType="dijit.form.Button"
             onClick="dijit.byId('delete_dialog').hide()">
-      Cancel
+      {% trans "Cancel" %}
     </button>
   </div>
 </div>
@@ -85,7 +86,7 @@
 </div>
 
 <div style="font-size:small; margin-top:40px; float:left;">
-  <i>Right click on a page for options.</i>
+  <i>{% trans "Right click on a page for options." %}</i>
 </div>
 
 {% endblock %}

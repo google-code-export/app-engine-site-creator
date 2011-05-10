@@ -1,5 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
   "http://www.w3.org/TR/html4/loose.dtd">
+
+{% load i18n %}
+
 <html>
   <head>
 	<title>
@@ -29,11 +32,11 @@
         {% block user_header %}
         {% if user %}
           <b>{{ user.email }}</b>
-          {% if is_superuser %} | <a href="{% url views.admin.index %}">Edit site</a>{% endif %}
-          {% if is_admin %} | <a href="{% url views.admin.display_memcache_info %}">Memcache</a>{% endif %}
-          {% if sign_out %} | <a href="{{sign_out}}">Sign out</a>{% endif %}
+          {% if is_superuser %} | <a href="{% url views.admin.index %}">{% trans "Edit site" %}</a>{% endif %}
+          {% if is_admin %} | <a href="{% url views.admin.display_memcache_info %}">{% trans "Memcache" %}</a>{% endif %}
+          {% if sign_out %} | <a href="{{sign_out}}">{% trans "Sign out" %}</a>{% endif %}
         {% else %}
-          {% if sign_in %}<a href="{{sign_in}}">Sign in</a>{%endif%}
+          {% if sign_in %}<a href="{{sign_in}}">{% trans "Sign in" %}</a>{%endif%}
         {% endif %}
         {% endblock %}
       </div>
@@ -45,7 +48,7 @@
         {% if sidebar %}
           {{ sidebar }}
         {% else %}
-          Sidebar not defined.
+          {% trans "Sidebar not defined." %}
         {% endif %}
       {% endblock %}
       </div>
@@ -58,7 +61,7 @@
         </div>
         <div id="content">
         {% block content %}
-          This page does not yet have any content.
+          {% trans "This page does not yet have any content." %}
         {% endblock %}
         </div>
       </div>

@@ -1,5 +1,7 @@
 {% extends "admin/base.html" %}
 
+{% load i18n %}
+
 {% block includes %}
   <script type="text/javascript"
           src="http://ajax.googleapis.com/ajax/libs/dojo/1.2.0/dojo/dojo.xd.js"
@@ -20,24 +22,24 @@
     {{form}}
   {% else %}
     <tr>
-      <th>Email:</th>
+      <th>{% trans "Email" %}:</th>
       <td><input type="text" name="email" id="id_email"></td>
     </tr>
   {% endif %}
   </table>
   <br>
-  <input type="submit" value="Submit" />
+  <input type="submit" value="{% trans "Submit" %}" />
 </form>
 
 {% if profile %}
 <div id="groupManagement">
   {% if profile.groups %}
   <div>
-    User's current groups:
+    {% trans "User's current groups" %}:
     <ul>
     {% for group in profile.groups %}
       <li>
-        {{ group.name }} - <a href="{% url views.admin.remove_from_group group.key.id,profile.email %}">Remove</a>
+        {{ group.name }} - <a href="{% url views.admin.remove_from_group group.key.id,profile.email %}">{% trans "Remove" %}</a>
       </li>
     {% endfor %}
     </ul>
@@ -46,12 +48,12 @@
 
   {% if profile.groups_not_in %}
   <div>
-    Add user to group: <select id="group_select">
+    {% trans "Add user to group" %}: <select id="group_select">
     {% for group in profile.groups_not_in %}
       <option value="{% url views.admin.add_to_group group.key.id,profile.email %}">{{ group.name }}</option>
     {% endfor %}
     </select>
-    <input type="button" onclick="addToGroup();" value="Add" />
+    <input type="button" onclick="addToGroup();" value="{% trans "Add" %}" />
   </div>
   {% endif %}
 </div>

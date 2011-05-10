@@ -1,5 +1,7 @@
 {% extends "themes/nautica05/base.html" %}
 
+{% load i18n %}
+
 {% block breadcrumbs %}
 	{% if page.breadcrumbs %}
 		{% for breadcrumb in page.breadcrumbs %}
@@ -20,18 +22,18 @@
 	 {% if page.content %}
 	   <p>{{ page.content }}</p>
 	 {% else %}
-	   <p>This page does not yet have any content.</p>
+	   <p>{% trans "This page does not yet have any content." %}</p>
 	 {% endif %} 
 {% endblock %}
 
 {% block right_column %}
 {% if is_editor %}
 	<ul class="submenu1">
-		<li><a href="{% url views.admin.edit_page page.key.id %}">Edit page</a></li>
-		<li><a href="{% url views.admin.new_page page.key.id %}">Add child</a></li>
+		<li><a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a></li>
+		<li><a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a></li>
 	</ul>
 	{% if files %}
-	    <h1>Attached files:</h1>
+	    <h1>{% trans "Attached files" %}:</h1>
 	    <ul style="submenu1">
 	    {% for file in files %}
 	      <l>

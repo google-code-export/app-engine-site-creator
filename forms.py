@@ -28,9 +28,11 @@ class PageEditForm(djangoforms.ModelForm):
 
   _text_attrs = dict(size=55, maxlength=80)
   title = forms.CharField(
-      widget=forms.TextInput(attrs=_text_attrs))
+      widget=forms.TextInput(attrs=_text_attrs),
+      label=_("Title"))
   name = forms.CharField(
-      widget=forms.TextInput(attrs=_text_attrs))
+      widget=forms.TextInput(attrs=_text_attrs),
+      label=_("Name"))
 
   def __init__(self, *args, **kwargs):
     # pylint: disable-msg=W0142

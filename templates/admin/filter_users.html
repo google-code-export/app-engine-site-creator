@@ -1,11 +1,13 @@
 {% extends "admin/base.html" %}
 
+{% load i18n %}
+
 {% block content %}
 <br />
-<a href="{% url views.admin.view_group None %}">Show All</a>
+<a href="{% url views.admin.view_group None %}">{% trans "Show All" %}</a>
 <br />
 <br />
-Filter by group:
+{% trans "Filter by group" %}:
 <ul>
 {% for group in groups %}
 <li>

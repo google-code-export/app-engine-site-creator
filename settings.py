@@ -21,6 +21,7 @@ import os
 
 APPEND_SLASH = False
 DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
+LANGUAGE_CODE = 'en-us'
 MIDDLEWARE_CLASSES = (
     'middleware.AddUserToRequestMiddleware',
 )

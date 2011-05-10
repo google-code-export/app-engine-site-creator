@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load i18n %}
+
 {% block title %}
   {{ page.title|escape }}
 {% endblock %}
@@ -8,8 +10,8 @@
   <div id="pageTitle">{{ page.title|escape }}</div>
   {% if is_editor %}
     <div id="editPageLink">
-      <a href="{% url views.admin.edit_page page.key.id %}">Edit page</a> |
-      <a href="{% url views.admin.new_page page.key.id %}">Add child</a>
+      <a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a> |
+      <a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a>
     </div>
   {% endif %}
 {% endblock %}
@@ -28,12 +30,12 @@
   {% if page.content %}
     {{ page.content }}
   {% else %}
-    This page does not yet have any content.
+    {% trans "This page does not yet have any content." %}
   {% endif %}
 
   {% if files %}
   <div id="attachments">
-    <h1>Attached files:</h1>
+    <h1>{% trans "Attached files" %}:</h1>
     <ul style="list-style-type:none">
     {% for file in files %}
       <li style="list-style-image:url({{file.icon}})">

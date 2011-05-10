@@ -1,12 +1,14 @@
 {% extends "admin/base.html" %}
 
+{% load i18n %}
+
 {% block body_attributes %}style="visibility:hidden"{% endblock %}
 
 {% block heading %}
 {% if page %}
-  Editing: {{page.title}}
+  {% trans "Editing" %}: {{page.title}}
 {% else %}
-  Create Page
+  {% trans "Create Page" %}
 {% endif %}
 {% endblock %}
 
@@ -115,17 +117,17 @@
 </script>
 
 {% if page %}
-  <a href="{% url views.main.get_url page.path %}">View page</a> |
-  <a href="{% url views.admin.delete_page page.key.id %}">Delete page</a>
+  <a href="{% url views.main.get_url page.path %}">{% trans "View page" %}</a> |
+  <a href="{% url views.admin.delete_page page.key.id %}">{% trans "Delete page" %}</a>
   {% if is_superuser %}
     {% if not page.in_sidebar %}
-  | <a href=" {% url views.admin.add_to_sidebar page.key.id %}">Add page to sidebar</a>
+  | <a href=" {% url views.admin.add_to_sidebar page.key.id %}">{% trans "Add page to sidebar" %}</a>
     {% endif %}
   {% endif %}
 {% endif %}
 
 <div id="mainTabs" dojoType="dijit.layout.TabContainer" style="margin-top:15px; width:100%; height:530px;">
-<div dojoType="dijit.layout.ContentPane" title="Page Contents" style="padding:5px;">
+<div dojoType="dijit.layout.ContentPane" title="{% trans "Page Contents" %}" style="padding:5px;">
   <form action="{% url views.admin.edit_page page.key.id %}"
         method="post"
         enctype="multipart/form-data"
@@ -138,7 +140,7 @@
           {{ field }}
           {% ifequal field.name "name" %}
             &nbsp; <span class="small"><a href="javascript:generate_name();">
-              Complete from title</a></span>
+              {% trans "Complete from title" %}</a></span>
           {% endifequal %}
           {% if field.help_text %}<br>{{ field.help_text }}{% endif %}
           {% if field.errors %}
@@ -159,18 +161,18 @@
     </script>
     <button dojoType="dijit.form.Button"
             onclick="javascript:submitContents();">
-      Save Page
+      {% trans "Save Page" %}
     </button>
   </form>
 </div><!-- closing content pane -->
 
 
 {% if page %}
-<div id="filesTab" dojoType="dijit.layout.ContentPane" title="Attachments" style="padding:5px;">
+<div id="filesTab" dojoType="dijit.layout.ContentPane" title="{% trans "Attachments" %}" style="padding:5px;">
 
   {% if files %}
   <div class="securityGroup">
-    Current attachments:
+    {% trans "Current attachments" %}:
     <ul style="list-style-type:none;">
     {% for file in files %}
       <li style="list-style-image:url({{file.icon}})">
@@ -182,7 +184,7 @@
           {{ file.name }}</a>
       &nbsp;
       <a href="{% url views.admin.delete_file page.key.id,file.key.id %}"
-         title="delete {{file.name}}">
+         title="{% trans "delete" %} {{file.name}}">
         <img src="/static/images/trash.gif"></a>
       {% if file.is_hidden %}
         <i>hidden</i>
@@ -197,7 +199,7 @@
     if (dojo.byId('urlInput').value != '') {
       dojo.byId('fileForm').submit();
     } else {
-      alert('Please input a valid URL');
+      alert('{% trans "Please input a valid URL" %}');
     }
   }
   </script>
@@ -208,18 +210,18 @@
         id="fileForm">
     <input type="hidden" name="page_id" value="{{ page.key.id }}" />
     <div class="securityGroup">
-      Upload a file: <br>
+      {% trans "Upload a file" %}: <br>
       <div style="padding-left: 40px; padding-top: 20px;">
         <input type="file" name="attachment"/ > <p>
-        <input type="checkbox" name="hidden" /> &nbsp; Don't show file in attachments <br><br>
-        <input type="submit" value="Upload" />
+        <input type="checkbox" name="hidden" /> &nbsp; {% trans "Don't show file in attachments" %} <br><br>
+        <input type="submit" value="{% trans "Upload" %}" />
       </div>
     </div>
     <div class="securityGroup">
-      Add a URL: <br>
+      {% trans "Add a URL" %}: <br>
       <div style="padding-left:40px; padding-top:20px;">
         <input type="text" id="urlInput" name="url" /> &nbsp;
-        <input type="button" onclick="attachUrl();" value="Attach" />
+        <input type="button" onclick="attachUrl();" value="{% trans "Attach" %}" />
       </div>
     </div>
   </form>
@@ -227,35 +229,35 @@
 {% endif %}
 
 {% if page %}
-<div id="securityTab" dojoType="dijit.layout.ContentPane" title="Security" style="padding:5px;">
+<div id="securityTab" dojoType="dijit.layout.ContentPane" title="{% trans "Security" %}" style="padding:5px;">
 <form action="{% url views.admin.edit_acl %}" method="post" id="securityForm">
   <input type="hidden" name="page_id" value="{{ page.key.id }}" />
 <div id="pageSecurity">
   {% if acl_data.inherits_acl %}
-  <h2>Security is inherited from "/{{ page.InheritsAclFrom.path }}"</h2>
+  <h2>{% trans "Security is inherited from" %} "/{{ page.InheritsAclFrom.path }}"</h2>
   {% endif %}
   <div class="securityGroup">
     <div>
-      Anyone can edit: <input type="checkbox"{% if page.acl.global_write %}
+      {% trans "Anyone can edit" %}: <input type="checkbox"{% if page.acl.global_write %}
                               checked="checked"{% endif %} name="global_write"/>
     </div>
     <div>
-      Anyone can read: <input type="checkbox"{% if page.acl.global_read %}
+      {% trans "Anyone can read" %}: <input type="checkbox"{% if page.acl.global_read %}
                               checked="checked"{% endif %} name="global_read"/>
     </div>
   </div>
   <div>
     <div class="securityGroup">
       <div class="aclExisting">
-      Groups that can edit:
+      {% trans "Groups that can edit" %}:
       <ul>
       {% for group in acl_data.group_write %}
-        <li>{{ group }} - Remove <input type="checkbox" name="group_write_remove_{{ group.key.id }}" /></li>
+        <li>{{ group }} - {% trans "Remove" %} <input type="checkbox" name="group_write_remove_{{ group.key.id }}" /></li>
       {% endfor %}
       </ul>
       </div>
       <div class="aclAdd">
-        Add a group:
+        {% trans "Add a group" %}:
         <select name="group_write">
           <option value=""></option>
           {% for group in acl_data.groups_without_write %}
@@ -266,15 +268,15 @@
     </div>
     <div class="securityGroup">
       <div class="aclExisting">
-      Groups that can read:
+      {% trans "Groups that can read" %}:
       <ul>
       {% for group in acl_data.group_read %}
-        <li>{{ group }} - Remove <input type="checkbox" name="group_read_remove_{{ group.key.id }}" /></li>
+        <li>{{ group }} - {% trans "Remove" %} <input type="checkbox" name="group_read_remove_{{ group.key.id }}" /></li>
       {% endfor %}
       </ul>
       </div>
       <div class="aclAdd">
-        Add a group:
+        {% trans "Add a group" %}:
         <select name="group_read">
           <option value=""></option>
           {% for group in acl_data.groups_without_read %}
@@ -287,29 +289,29 @@
   <div>
     <div class="securityGroup">
       <div class="aclExisting">
-        Users that can edit:
+        {% trans "Users that can edit" %}:
         <ul>
         {% for user_profile in acl_data.user_write %}
-          <li>{{ user_profile }} - Remove <input type="checkbox" name="user_write_remove_{{ user_profile.key.id }}" /></li>
+          <li>{{ user_profile }} - {% trans "Remove" %} <input type="checkbox" name="user_write_remove_{{ user_profile.key.id }}" /></li>
         {% endfor %}
         </ul>
       </div>
       <div class="aclAdd">
-        Add a user:
+        {% trans "Add a user" %}:
         <input type="text" name="user_write" />
       </div>
     </div>
     <div class="securityGroup">
       <div class="aclExisting">
-        Users that can read:
+        {% trans "Users that can read" %}:
         <ul>
         {% for user_profile in acl_data.user_read %}
-          <li>{{ user_profile }} - Remove <input type="checkbox" name="user_read_remove_{{ user_profile.key.id }}" /></li>
+          <li>{{ user_profile }} - {% trans "Remove" %} <input type="checkbox" name="user_read_remove_{{ user_profile.key.id }}" /></li>
         {% endfor %}
         </ul>
       </div>
       <div class="aclAdd">
-        Add a user:
+        {% trans "Add a user" %}:
         <input type="text" name="user_read" />
       </div>
     </div>
@@ -318,17 +320,13 @@
 <button dojoType="dijit.form.Button"
         onclick="javascript:saveSecurity();"
         style="margin-top:15px;">
-  Save Security Settings
+  {% trans "Save Security Settings" %}
 </button>
 </form>
 <script type="text/javascript">
 function saveSecurity() {
   {% if acl_data.inherits_acl %}
-    var message = 'You are about to change the security of a page that ' +
-                  'is inheriting its security from a page above it in ' +
-                  'the heirarchy.  Any subsequent changes to the parent ' +
-                  'page will not be reflected on this page and all child ' +
-                  'pages.  Are you sure you want to do this?';
+    var message = '{% trans "You are about to change the security of a page that is inheriting its security from a page above it in the heirarchy.  Any subsequent changes to the parent page will not be reflected on this page and all child pages.  Are you sure you want to do this?" %}';
     if (!confirm(message)) {
       return;
     }
@@ -341,6 +339,6 @@ function saveSecurity() {
 </div> <!-- closing tab container -->
 
 <div id="msgChangesSaved" style="visibility: hidden;">
-  Your changes have been saved
+  {% trans "Your changes have been saved" %}
 </div>
 {% endblock %}

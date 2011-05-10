@@ -1,5 +1,7 @@
 {% extends "themes/ecobusiness/base.html" %}
 
+{% load i18n %}
+
 {% block breadcrumbs %}
 	{% if page.breadcrumbs %}
 		{% for breadcrumb in page.breadcrumbs %}
@@ -20,7 +22,7 @@
 	 {% if page.content %}
 	   <p>{{ page.content }}</p>
 	 {% else %}
-	   <p>This page does not yet have any content.</p>
+	   <p>{% trans "This page does not yet have any content." %}</p>
 	 {% endif %} 
 {% endblock %}
 
@@ -30,14 +32,14 @@
 			<div class="rightbox_wrapper">
 				<div class="rightbox">
 					<div class="product_wrapper">
-						<a href="{% url views.admin.edit_page page.key.id %}">Edit page</a>
+						<a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a>
 					</div>
 					<div class="product_wrapper">
-						<a href="{% url views.admin.new_page page.key.id %}">Add child</a>
+						<a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a>
 					</div>
 					{% if files %}
 					<div class="product_wrapper">
-					    <h1>Attached files:</h1>
+					    <h1>{% trans "Attached files" %}:</h1>
 					    <ul style="list-style-type:none">
 					    {% for file in files %}
 					      <li style="list-style-image:url({{file.icon}})">
