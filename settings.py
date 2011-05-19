@@ -34,4 +34,8 @@ TEMPLATE_DIRS = (
 )
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
+    'django.template.loaders.app_directories.Loader',
+)
+INSTALLED_APPS = (
+    'sitemap',
 )

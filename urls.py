@@ -50,6 +50,7 @@ urlpatterns = defaults.patterns(
     (r'^admin/memcache_info/flush/$', 'admin.flush_memcache_info'),
     (r'^_treedata/$', 'main.get_tree_data'),
     (r'^sitemap/$', 'main.page_list'),
+    defaults.url(r'^sitemap\.xml$', defaults.include('sitemap.urls')),
     (r'^(.*)$', 'main.get_url'),
 )
 
