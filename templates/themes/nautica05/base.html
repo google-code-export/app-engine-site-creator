@@ -125,7 +125,7 @@
       <div id="sidebar">
      	{% block sidebar %}
 	        {% if sidebar %}
-	          {{ sidebar }}
+	          {{ sidebar|safe }}
 	        {% else %}
 	          &nbsp;
 	        {% endif %}
@@ -164,7 +164,7 @@
     <img src="images/logo.gif" alt=""/>
 	
 	{% block footer %}
-		<center>{{ configuration.FOOTER_HTML }}</center>
+		<center>{{ configuration.FOOTER_HTML|safe }}</center>
 	{% endblock %}
 
   </div>

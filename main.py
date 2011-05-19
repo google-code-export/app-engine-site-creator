@@ -23,26 +23,50 @@ directly -- everything else is controlled from there.
 
 """
 
+# Standard Python imports.
 import os
-from django.conf import settings
-from django.core.handlers import wsgi
+import sys
+import logging
+
+# Log a message each time this module get loaded.
+logging.info('Loading %s, app version = %s',
+             __name__, os.getenv('CURRENT_VERSION_ID'))
+
+import appengine_config  # pylint: disable-msg=W0611
+
+# AppEngine imports.
 from google.appengine.ext.webapp import util
 
-settings._target = None
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+# Import webapp.template.  This makes most Django setup issues go away.
+from google.appengine.ext.webapp import template  # pylint: disable-msg=W0611
 
+# Import various parts of Django.
+import django.core.handlers.wsgi
 import django.core.signals
 import django.db
-import django.dispatch.dispatcher
+import django.forms
+
+# Work-around to avoid warning about django.newforms in djangoforms.
+django.newforms = django.forms
+
+
+def log_exception(*args, **kwds):
+  # pylint: disable-msg=W0613
+  """Django signal handler to log an exception."""
+  cls, err = sys.exc_info()[:2]
+  logging.exception('Exception in request: %s: %s', cls.__name__, err)
+
+
+# Log all exceptions detected by Django.
+django.core.signals.got_request_exception.connect(log_exception)
 
 # Unregister the rollback event handler.
-django.dispatch.dispatcher.disconnect(
-    django.db._rollback_on_exception,  # pylint: disable-msg=W0212
-    django.core.signals.got_request_exception)
+django.core.signals.got_request_exception.disconnect(
+    django.db._rollback_on_exception)  # pylint: disable-msg=W0212
 
 def main():
   """Loads the django application."""
-  application = wsgi.WSGIHandler()
+  application = django.core.handlers.wsgi.WSGIHandler()
   util.run_wsgi_app(application)
 
 if __name__ == '__main__':
