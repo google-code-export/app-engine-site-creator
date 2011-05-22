@@ -21,7 +21,7 @@
 
 <h1>{% trans "Group Information" %}:</h1>
 
-<form action="{% url views.admin.edit_group group.key.id %}"
+<form action="{% if group %}{% url views.admin.edit_group group.key.id %}{% else %}{% url views.admin.new_group %}{% endif %}"
       method="post">
   <table cellpadding="5">
   {% for field in form %}

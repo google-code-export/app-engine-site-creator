@@ -25,6 +25,7 @@ import StringIO
 from django import http
 from django.core import urlresolvers
 from django.core import validators
+from django.core import exceptions
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -204,7 +205,7 @@ def edit_page(request, page_id, parent_id=None):
     form = forms.PageEditForm(data=None, instance=page)
     return utility.respond(request, 'admin/edit_page',
                            {'form': form, 'page': page, 'files': files,
-                            'acl_data': acl_data})
+                            'acl_data': acl_data, 'parent_id': parent_id})
 
   form = forms.PageEditForm(data=request.POST, instance=page)
 
@@ -284,8 +285,8 @@ def upload_file(request):
   file_name = None
   url = None
   if request.FILES and 'attachment' in request.FILES:
-    file_name = request.FILES['attachment']['filename']
-    file_data = request.FILES['attachment']['content']
+    file_name = request.FILES['attachment'].name
+    file_data = request.FILES['attachment'].read()
   elif 'url' in request.POST:
     url = request.POST['url']
     file_name = url.split('/')[-1]
@@ -296,9 +297,10 @@ def upload_file(request):
     url = 'invalid URL'
 
   if url:
+    validate = validators.URLValidator()
     try:
-      validators.isValidURL(url, None)
-    except validators.ValidationError, excption:
+      validate(url)
+    except exceptions.ValidationError, excption:
       return utility.page_not_found(request, excption.messages[0])
 
   file_record = page.get_attachment(file_name)

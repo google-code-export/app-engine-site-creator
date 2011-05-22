@@ -18,7 +18,7 @@
 """Custom validators."""
 
 import re
-from django import newforms as forms
+from django import forms
 
 PAGE_NAME_RE = re.compile(r'^([\w\-]+)$')
 

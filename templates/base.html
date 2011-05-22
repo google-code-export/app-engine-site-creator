@@ -46,7 +46,7 @@
       <div id="sidebar">
       {% block sidebar %}
         {% if sidebar %}
-          {{ sidebar }}
+          {{ sidebar|safe }}
         {% else %}
           {% trans "Sidebar not defined." %}
         {% endif %}
@@ -69,7 +69,7 @@
 
     <div id="footer">
     {% block footer %}
-      {{ configuration.FOOTER_HTML }}
+      {{ configuration.FOOTER_HTML|safe }}
     {% endblock %}
 
     {% block tracking %}

@@ -127,7 +127,7 @@ def get_url(request, path_str):
       return follow_url_forwards(models.Page.get_root(), post_path)
     return follow_url_backwards(pre_path[:-1], [pre_path[-1]] + post_path)
 
-  path = [dir_name for dir_name in path_str.split('/') if dir_name is not '']
+  path = [dir_name for dir_name in path_str.split('/') if dir_name]
   item = follow_url_backwards(path, [])
 
   if isinstance(item, models.Page):

@@ -20,7 +20,7 @@
 
 {% block content %}
 	 {% if page.content %}
-	   <p>{{ page.content }}</p>
+	   <p>{{ page.content|safe }}</p>
 	 {% else %}
 	   <p>{% trans "This page does not yet have any content." %}</p>
 	 {% endif %} 

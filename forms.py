@@ -17,7 +17,8 @@
 
 """Forms referenced by the views."""
 
-from django import newforms as forms
+from django import forms
+from django.utils.translation import ugettext as _
 from google.appengine.ext.db import djangoforms
 import models
 import validators
@@ -47,7 +48,7 @@ class PageEditForm(djangoforms.ModelForm):
 
   def clean_name(self):
     """Django validator to ensure the page name can be part of a URL."""
-    name = self.clean_data['name']
+    name = self.cleaned_data['name']
     validators.is_valid_page_name(name)
     return name
 

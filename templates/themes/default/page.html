@@ -28,7 +28,7 @@
     </div>
   {% endif %}
   {% if page.content %}
-    {{ page.content }}
+    {{ page.content|safe }}
   {% else %}
     {% trans "This page does not yet have any content." %}
   {% endif %}
