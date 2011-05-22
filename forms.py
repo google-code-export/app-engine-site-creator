@@ -18,7 +18,7 @@
 """Forms referenced by the views."""
 
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils import translation
 from google.appengine.ext.db import djangoforms
 import models
 import validators
@@ -30,10 +30,10 @@ class PageEditForm(djangoforms.ModelForm):
   _text_attrs = dict(size=55, maxlength=80)
   title = forms.CharField(
       widget=forms.TextInput(attrs=_text_attrs),
-      label=_("Title"))
+      label=translation.ugettext("Title"))
   name = forms.CharField(
       widget=forms.TextInput(attrs=_text_attrs),
-      label=_("Name"))
+      label=translation.ugettext("Name"))
 
   def __init__(self, *args, **kwargs):
     # pylint: disable-msg=W0142
