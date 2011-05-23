@@ -19,6 +19,7 @@
 
 from django.core import urlresolvers
 from django.core import validators
+from django.utils import encoding
 from google.appengine.ext import db
 
 import utility
@@ -494,7 +495,7 @@ class UserGroup(db.Model):
 
   def __str__(self):
     """Overridden string representation."""
-    return self.name
+    return encoding.smart_str(self.name)
 
   def put(self):
     """Overridden method to ensure name is kept unique."""
