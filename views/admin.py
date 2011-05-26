@@ -26,6 +26,7 @@ from django import http
 from django.core import urlresolvers
 from django.core import validators
 from django.core import exceptions
+from django.utils import translation
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -567,12 +568,13 @@ def edit_user(request, email):
                                  args=[request.POST['email']])
       return http.HttpResponseRedirect(url)
     else:
-      return utility.respond(request, 'admin/edit_user', {'title': 'Edit user'})
+      title = translation.ugettext('Edit user')
+      return utility.respond(request, 'admin/edit_user', {'title': title})
 
   profile = models.UserProfile.load(email)
   if not profile:
     return utility.page_not_found(request)
-  title = 'Edit user: ' + email
+  title = translation.ugettext('Edit user: %(email)s') % {'email': email}
 
   return utility.edit_instance(request, models.UserProfile, forms.UserEditForm,
                                'admin/edit_user',
@@ -592,8 +594,9 @@ def bulk_edit_users(request):
 
   """
   if not request.POST:
+    title = translation.ugettext('Bulk user upload form')
     return utility.respond(request, 'admin/bulk_edit_users',
-                           {'title': 'Bulk user upload form'})
+                           {'title': title})
 
   data = request.POST['users_text']
   if data and data[-1] != '\n':

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: app-engine-site-creator 1.1.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-10 19:25+0200\n"
+"POT-Creation-Date: 2011-05-26 11:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Robert Frysiak <robert.frysiak@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,13 +16,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: forms.py:32
+#: forms.py:33
 msgid "Title"
 msgstr "Tytuł"
 
-#: forms.py:35
+#: forms.py:36 forms.py:59
 msgid "Name"
 msgstr "Nazwa"
+
+#: forms.py:60
+msgid "Description"
+msgstr "Opis"
+
+#: forms.py:73
+msgid "Is superuser"
+msgstr "Jest superużytkownikiem"
 
 #: templates/base.html:35 templates/themes/ecobusiness/base.html:26
 #: templates/themes/nautica05/base.html:42
@@ -70,11 +78,11 @@ msgstr "Strony"
 
 #: templates/admin/base.html:15
 msgid "Sitemap"
-msgstr ""
+msgstr "Mapa witryny"
 
 #: templates/admin/base.html:16
 msgid "Recently modified"
-msgstr "Ostatnio zmieniane"
+msgstr "Ostatnio zmienione"
 
 #: templates/admin/base.html:17
 msgid "Create page"
@@ -122,7 +130,7 @@ msgstr "Wyślij"
 
 #: templates/admin/edit_group.html:7
 msgid "Edit Group"
-msgstr "Edytuj Grupę"
+msgstr "Edycja Grupy"
 
 #: templates/admin/edit_group.html:9
 msgid "Create Group"
@@ -134,7 +142,7 @@ msgstr "Usuń Grupę"
 
 #: templates/admin/edit_group.html:22
 msgid "Group Information"
-msgstr "Informacje o grupach"
+msgstr "Informacje o grupie"
 
 #: templates/admin/edit_group.html:41 templates/admin/edit_sidebar.html:14
 msgid "Save"
@@ -386,7 +394,7 @@ msgstr "Wyczyść Memcache"
 
 #: templates/admin/recently_modified.html:7
 msgid "Recently Modified Pages"
-msgstr "Ostatnio Zmieniane Strony"
+msgstr "Ostatnio Zmienione Strony"
 
 #: templates/admin/recently_modified.html:13
 msgid "view"
@@ -419,3 +427,16 @@ msgstr "Edytuj stronę"
 #: templates/themes/nautica05/page.html:36
 msgid "Attached files"
 msgstr "Załączone pliki"
+
+#: views/admin.py:571
+msgid "Edit user"
+msgstr "Edytuj użytkownika"
+
+#: views/admin.py:577
+#, python-format
+msgid "Edit user: %(email)s"
+msgstr "Edycja użytkownika: %(email)s"
+
+#: views/admin.py:597
+msgid "Bulk user upload form"
+msgstr "Formularz masowego wczytywania użytkowników"

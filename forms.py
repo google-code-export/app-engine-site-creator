@@ -56,6 +56,9 @@ class PageEditForm(djangoforms.ModelForm):
 class GroupEditForm(djangoforms.ModelForm):
   """Form used by editors to modify a user group."""
 
+  name = forms.CharField(label=translation.ugettext('Name'))
+  description = forms.CharField(label=translation.ugettext('Description'))
+
   class Meta(object):
     # pylint: disable-msg=R0903
     """Django instruction to link the form to UserGroup model."""
@@ -65,6 +68,10 @@ class GroupEditForm(djangoforms.ModelForm):
 
 class UserEditForm(djangoforms.ModelForm):
   """Form used by editors to modify a user profile."""
+
+  is_superuser = forms.BooleanField(
+      label=translation.ugettext('Is superuser'),
+      required=False)
 
   #TODO(bogosian): when checkbox is empty the form POST is empty without this
   hidden_dummy = forms.Field(widget=forms.HiddenInput(attrs={'value': 'dummy'}))
