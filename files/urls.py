@@ -15,28 +15,15 @@
 # limitations under the License.
 #
 
-"""Django settings for app-engine-site-creator project."""
+"""Defines the url patterns for the application."""
 
-import os
+# pylint: disable-msg=C0103,C0301
 
-APPEND_SLASH = False
-DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
-LANGUAGE_CODE = 'en-us'
-MIDDLEWARE_CLASSES = (
-    'middleware.AddUserToRequestMiddleware',
-)
-ROOT_PATH = os.path.dirname(__file__)
-ROOT_URLCONF = 'urls'
-TEMPLATE_DEBUG = DEBUG
-TEMPLATE_CONTEXT_PROCESSORS = ()
-TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'templates'),
-)
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-)
+from django.conf.urls import defaults
 
-INSTALLED_APPS = (
-    'files',
-    #'blobs',
+urlpatterns = defaults.patterns(
+    'files.views',
+    (r'add/$', 'upload_file'),
+    defaults.url(r'delete/([\w\-]+)/([^\s/]+)$',
+                  'delete_file', name='file-delete'),
 )

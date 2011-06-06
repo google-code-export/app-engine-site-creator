@@ -17,9 +17,7 @@
 
 """Main views for viewing pages and downloading files."""
 
-import datetime
 import logging
-import mimetypes
 
 import configuration
 from django import http
@@ -27,6 +25,8 @@ from django.core import urlresolvers
 from django.utils import simplejson
 import models
 import utility
+import blobs.views
+import files.views
 
 
 def send_page(page, request):
@@ -64,32 +64,6 @@ def send_page(page, request):
 
   return utility.respond(request, template, {'page': page, 'files': files,
                                              'is_editor': is_editor})
-
-
-def send_file(file_record, request):
-  """Sends a given file to a user if they have access rights.
-
-  Args:
-    file_record: The file to send to the user
-    request: The Django request object
-
-  Returns:
-    A Django HttpResponse containing the requested file, or an error message.
-
-  """
-  profile = request.profile
-  mimetype = mimetypes.guess_type(file_record.name)[0]
-
-  if not file_record.user_can_read(profile):
-    logging.warning('User %s made an invalid attempt to access file %s' %
-                    (profile.email, file_record.name))
-    return utility.forbidden(request)
-
-  expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
-  response = http.HttpResponse(content=file_record.data, mimetype=mimetype)
-  response['Cache-Control'] = configuration.FILE_CACHE_CONTROL
-  response['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
-  return response
 
 
 def get_url(request, path_str):
@@ -134,7 +108,10 @@ def get_url(request, path_str):
     return send_page(item, request)
 
   if isinstance(item, models.FileStore):
-    return send_file(item, request)
+    return files.views.send_file(item, request)
+
+  if isinstance(item, models.FileBlobStore):
+    return blobs.views.send_blob(item, request)
 
   return utility.page_not_found(request)
 

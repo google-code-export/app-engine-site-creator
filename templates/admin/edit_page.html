@@ -183,7 +183,7 @@
       {% endif %}
           {{ file.name }}</a>
       &nbsp;
-      <a href="{% url views.admin.delete_file page.key.id,file.key.id %}"
+      <a href="{% url file-delete page.key.id,file.key.id %}"
          title="{% trans "delete" %} {{file.name}}">
         <img src="/static/images/trash.gif"></a>
       {% if file.is_hidden %}
@@ -204,7 +204,7 @@
   }
   </script>
 
-  <form action="{% url views.admin.upload_file %}"
+  <form action="{{ upload_url }}"
         method="post"
         enctype="multipart/form-data"
         id="fileForm">

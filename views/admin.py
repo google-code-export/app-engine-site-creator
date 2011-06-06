@@ -27,9 +27,12 @@ from django.core import urlresolvers
 from django.core import validators
 from django.core import exceptions
 from django.utils import translation
+from django.conf import settings
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
+from google.appengine.ext import blobstore
+from google.appengine.runtime import apiproxy_errors
 import models
 import utility
 import yaml
@@ -178,8 +181,7 @@ def edit_page(request, page_id, parent_id=None):
           request, 'No page exists with id %r.' % page_id)
     if not page.user_can_write(request.profile):
       return utility.forbidden(request)
-    files = list(
-        models.FileStore.all().filter('parent_page =', page).order('name'))
+    files = page.attached_files()
     for item in files:
       item.icon = '/static/images/fileicons/%s.png' % item.name.split('.')[-1]
 
@@ -202,11 +204,24 @@ def edit_page(request, page_id, parent_id=None):
         'inherits_acl': page.inherits_acl(),
     }
 
+  if 'files' in settings.INSTALLED_APPS:
+    upload_url = urlresolvers.reverse('files.views.upload_file')
+  elif 'blobs' in settings.INSTALLED_APPS:
+    try:
+      upload_url = blobstore.create_upload_url(
+                      urlresolvers.reverse('blobs.views.upload_blob'))
+    except apiproxy_errors.FeatureNotEnabledError, excption:
+      upload_url = ''
+      logging.error('Unable to create Upload URL: %s' % excption)
+  else:
+    upload_url = ''
+
   if not request.POST:
     form = forms.PageEditForm(data=None, instance=page)
     return utility.respond(request, 'admin/edit_page',
                            {'form': form, 'page': page, 'files': files,
-                            'acl_data': acl_data, 'parent_id': parent_id})
+                            'acl_data': acl_data, 'parent_id': parent_id,
+                            'upload_url': upload_url})
 
   form = forms.PageEditForm(data=request.POST, instance=page)
 
@@ -256,94 +271,6 @@ def new_page(request, parent_id):
   if not parent_page.user_can_write(request.profile):
     return utility.forbidden(request)
   return edit_page(request, None, parent_id=parent_id)
-
-
-def upload_file(request):
-  """Reads a file from POST data and stores it in the db.
-
-  Args:
-    request: The request object
-
-  Returns:
-    A http redirect to the edit form for the parent page
-
-  """
-  if not request.POST or not 'page_id' in request.POST:
-    return utility.page_not_found(request)
-
-  page_id = request.POST['page_id']
-  page = models.Page.get_by_id(int(page_id))
-  
-  if not page:
-    logging.warning('admin.upload_file was passed an invalid page id %r',
-                    page_id)
-    return utility.page_not_found(request)
-
-  if not page.user_can_write(request.profile):
-    return utility.forbidden(request)
-
-  file_data = None
-  file_name = None
-  url = None
-  if request.FILES and 'attachment' in request.FILES:
-    file_name = request.FILES['attachment'].name
-    file_data = request.FILES['attachment'].read()
-  elif 'url' in request.POST:
-    url = request.POST['url']
-    file_name = url.split('/')[-1]
-  else:
-    return utility.page_not_found(request)
-
-  if not url and not file_name:
-    url = 'invalid URL'
-
-  if url:
-    validate = validators.URLValidator()
-    try:
-      validate(url)
-    except exceptions.ValidationError, excption:
-      return utility.page_not_found(request, excption.messages[0])
-
-  file_record = page.get_attachment(file_name)
-
-  if not file_record:
-    file_record = models.FileStore(name=file_name, parent_page=page)
-
-  if file_data:
-    file_record.data = db.Blob(file_data)
-  elif url:
-    file_record.url = db.Link(url)
-
-  # Determine whether to list the file when the page is viewed
-  file_record.is_hidden = 'hidden' in request.POST
-
-  file_record.put()
-  utility.clear_memcache()
-
-  return utility.edit_updated_page(page_id, tab_name='files')
-
-
-def delete_file(request, page_id, file_id):
-  """Removes a specified file from the database.
-
-  Args:
-    request: The request object
-    page_id: ID of the page the file is attached to.
-    file_id: Id of the file.
-
-  Returns:
-    A Django HttpResponse object.
-
-  """
-  record = models.FileStore.get_by_id(int(file_id))
-  if record:
-    if not record.user_can_write(request.profile):
-      return utility.forbidden(request)
-
-    record.delete()
-    return utility.edit_updated_page(page_id, tab_name='files')
-  else:
-    return utility.page_not_found(request)
 
 
 def delete_page(request, page_id):
