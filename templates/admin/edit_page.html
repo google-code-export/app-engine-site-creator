@@ -183,7 +183,12 @@
       {% endif %}
           {{ file.name }}</a>
       &nbsp;
-      <a href="{% url file-delete page.key.id,file.key.id %}"
+      {% if configuration.FILE_STORING == "data" %}
+        <a href="{% url file-delete page.key.id,file.key.id %}"
+      {% endif %}
+      {% if configuration.FILE_STORING == "blob" %}
+        <a href="{% url blob-delete page.key.id,file.key.id %}"
+      {% endif %}
          title="{% trans "delete" %} {{file.name}}">
         <img src="/static/images/trash.gif"></a>
       {% if file.is_hidden %}
@@ -213,6 +218,9 @@
       {% trans "Upload a file" %}: <br>
       <div style="padding-left: 40px; padding-top: 20px;">
         <input type="file" name="attachment"/ > <p>
+        {% if configuration.FILE_STORING == "blob" %}
+          <input type="checkbox" name="thumbnail" /> &nbsp; {% trans "Create a URL for thumbnails" %} <br>
+        {% endif %}
         <input type="checkbox" name="hidden" /> &nbsp; {% trans "Don't show file in attachments" %} <br><br>
         <input type="submit" value="{% trans "Upload" %}" />
       </div>

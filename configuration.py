@@ -33,6 +33,9 @@ FOOTER_HTML = (
 FILE_CACHE_CONTROL = 'private, max-age=86400'
 FILE_CACHE_TIME = datetime.timedelta(days=1)
 
+# Choose a mode of storing files. 'data' value for storing in Datastore
+# or 'blob' value for storing in Blobstore
+FILE_STORING = 'data'
 
 # Title for the website
 SYSTEM_TITLE = 'App Engine Site Creator'

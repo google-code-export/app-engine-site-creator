@@ -24,10 +24,7 @@ import StringIO
 
 from django import http
 from django.core import urlresolvers
-from django.core import validators
-from django.core import exceptions
 from django.utils import translation
-from django.conf import settings
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -36,6 +33,7 @@ from google.appengine.runtime import apiproxy_errors
 import models
 import utility
 import yaml
+import configuration
 
 
 def admin_required(func):
@@ -204,9 +202,9 @@ def edit_page(request, page_id, parent_id=None):
         'inherits_acl': page.inherits_acl(),
     }
 
-  if 'files' in settings.INSTALLED_APPS:
+  if configuration.FILE_STORING == 'data':
     upload_url = urlresolvers.reverse('files.views.upload_file')
-  elif 'blobs' in settings.INSTALLED_APPS:
+  elif configuration.FILE_STORING == 'blob':
     try:
       upload_url = blobstore.create_upload_url(
                       urlresolvers.reverse('blobs.views.upload_blob'))

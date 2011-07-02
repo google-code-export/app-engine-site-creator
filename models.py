@@ -20,12 +20,12 @@
 from django.core import urlresolvers
 from django.core import validators
 from django.utils import encoding
-from django.conf import settings
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
 
 import utility
 import yaml
+import configuration
 
 
 class AccessControlList(db.Model):
@@ -278,12 +278,11 @@ class Page(File):
 
   @property
   def filestore_children(self):
-    """Returns a query for all of the child FileStore objects."""
-    if 'files' in settings.INSTALLED_APPS:
+    """Returns a query for all of the child FileStore or BlobStore objects."""
+    if configuration.FILE_STORING == 'data':
       return FileStore.all().filter('parent_page = ', self)
-    elif 'blobs' in settings.INSTALLED_APPS:
-      return FileBlobStore.all().filter('parent_page = ', self)
-    
+    if configuration.FILE_STORING == 'blob':
+      return BlobStore.all().filter('parent_page = ', self)
 
   @property
   def breadcrumbs(self):
@@ -399,32 +398,33 @@ class FileStore(File):
     super(FileStore, self).delete()
 
 
-class FileBlobStore(File):
+class BlobStore(File):
   # pylint: disable-msg=R0904
   """A class that represents a single file attached to a page. """
 
   is_hidden = db.BooleanProperty(default=False)
   url_data = db.LinkProperty()
+  url_thumb = db.LinkProperty()
   blob_data = blobstore.BlobReferenceProperty()
 
-  def __get_data(self):
+  def __get_blob_key(self):
     """Retrieves the blob key from the child object."""
     return str(self.blob_data.key())
 
-  def __set_data(self, data):
+  def __set_blob_key(self, blob_key):
     """Sets the data on the child object, creating one if necessary."""
-    if not data:
+    if not blob_key:
       if self.blob_data:
         self.blob_data.delete()
         self.blob_data = None
         self.put()
       return
 
-    self.blob_data = data
+    self.blob_data = blob_key
     self.url = None
     self.put()
 
-  data = property(__get_data, __set_data)
+  blob_key = property(__get_blob_key, __set_blob_key)
 
   def __get_url(self):
     """Exposes the url property."""
@@ -443,7 +443,7 @@ class FileBlobStore(File):
     """Overridden to ensure child objects are cleaned up on delete."""
     if self.blob_data:
       self.blob_data.delete()
-    super(FileBlobStore, self).delete()
+    super(BlobStore, self).delete()
 
 
 class UserProfile(db.Model):

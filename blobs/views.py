@@ -22,11 +22,11 @@ import datetime
 import logging
 
 from django import http
-from django.core import urlresolvers
 from django.core import validators
 from django.core import exceptions
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
+from google.appengine.api import images
 
 import models
 import utility
@@ -47,7 +47,7 @@ def upload_blob(request):
   fields = cgi.FieldStorage()
 
   if not fields.has_key('page_id'):
-    return http.HttpResponseRedirect(back_url())
+    return utility.edit_updated_page(tab_name='files')
 
   page_id = fields['page_id'].value
   page = models.Page.get_by_id(int(page_id))
@@ -55,10 +55,10 @@ def upload_blob(request):
   if not page:
     logging.warning('blobs.upload_file was passed an invalid page id %r',
                     page_id)
-    return http.HttpResponseRedirect(back_url(page_id))
+    return utility.edit_updated_page(page_id, tab_name='files')
 
   if not page.user_can_write(request.profile):
-    return http.HttpResponseRedirect(back_url(page_id))
+    return utility.edit_updated_page(page_id, tab_name='files')
 
   blob_info = None
   file_name = None
@@ -71,7 +71,7 @@ def upload_blob(request):
     url = fields['url'].value
     file_name = url.split('/')[-1]
   else:
-    return http.HttpResponseRedirect(back_url(page_id))
+    return utility.edit_updated_page(page_id, tab_name='files')
 
   if not url and not file_name:
     url = 'invalid URL'
@@ -81,25 +81,30 @@ def upload_blob(request):
     try:
       validate(url)
     except exceptions.ValidationError, excption:
-      return http.HttpResponseRedirect(back_url(page_id))
+      return utility.edit_updated_page(page_id, tab_name='files')
 
   file_record = page.get_attachment(file_name)
 
   if not file_record:
-    file_record = models.FileBlobStore(name=file_name, parent_page=page)
+    file_record = models.BlobStore(name=file_name, parent_page=page)
 
   if blob_info:
-    file_record.data = blob_info.key()
+    file_record.blob_key = blob_info.key()
   elif url:
     file_record.url = db.Link(url)
 
   # Determine whether to list the file when the page is viewed
   file_record.is_hidden = 'hidden' in fields
 
+  thumb_images = ['image/bmp', 'image/gif', 'image/jpeg', 'image/png',
+                  'image/tiff', 'image/vnd.microsoft.icon']
+  if 'thumbnail' in fields and file_record.blob_data.content_type in thumb_images:
+    file_record.url_thumb = db.Link(images.get_serving_url(file_record.blob_key))
+
   file_record.put()
   utility.clear_memcache()
 
-  return http.HttpResponseRedirect(back_url(page_id))
+  return utility.edit_updated_page(page_id, tab_name='files')
 
 
 def delete_blob(request, page_id, file_id):
@@ -114,7 +119,7 @@ def delete_blob(request, page_id, file_id):
     A Django HttpResponse object.
 
   """
-  record = models.FileBlobStore.get_by_id(int(file_id))
+  record = models.BlobStore.get_by_id(int(file_id))
   if record:
     if not record.user_can_write(request.profile):
       return utility.forbidden(request)
@@ -143,29 +148,13 @@ def send_blob(file_record, request):
                     (profile.email, file_record.name))
     return utility.forbidden(request)
 
-  resource = file_record.data
+  resource = file_record.blob_key
   blob_info = blobstore.BlobInfo.get(resource)
-  expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
   response = http.HttpResponse()
   response[blobstore.BLOB_KEY_HEADER] = resource
   response['Content-Type'] = blob_info.content_type
+
+  expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
   response['Cache-Control'] = configuration.FILE_CACHE_CONTROL
   response['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
   return response
-
-
-def back_url(page_id=None):
-  """Function returning URL to files tab of edit form for page_id.
-
-  Args:
-    page_id: the id of the page that is being edited
-
-  Returns:
-    URL to edit form
-
-  """
-  if not page_id:
-    return urlresolvers.reverse('views.admin.index')
-  url = urlresolvers.reverse('views.admin.edit_page', args=[str(page_id)])
-  url = '%s#%s' % (url, 'files')
-  return url

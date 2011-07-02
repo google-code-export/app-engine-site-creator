@@ -38,5 +38,5 @@ TEMPLATE_LOADERS = (
 
 INSTALLED_APPS = (
     'files',
-    #'blobs',
+    'blobs',
 )

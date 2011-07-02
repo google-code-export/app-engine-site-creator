@@ -25,6 +25,7 @@ from django import http
 from django.core import validators
 from django.core import exceptions
 from google.appengine.ext import db
+from google.appengine.api import images
 
 import models
 import utility
@@ -138,8 +139,30 @@ def send_file(file_record, request):
                     (profile.email, file_record.name))
     return utility.forbidden(request)
 
+  response = None
+  if request.GET.get('s'):
+    s = int(request.GET.get('s'))
+    img = images.Image(file_record.data)
+    if img.width > s and img.height > s:
+      img.resize(width=s, height=s)
+      thumbnail = img.execute_transforms(output_encoding=images.JPEG)
+      response = http.HttpResponse(content=thumbnail, mimetype='image/jpeg')
+  elif request.GET.get('c'):
+    c = int(request.GET.get('c'))
+    img = images.Image(file_record.data)
+    if img.width > img.height:
+      x = (img.width-img.height)/float(img.width*2)
+      img.crop(x, 0.0, 1-x, 1.0)
+    if img.width < img.height:
+      y = (img.height-img.width)/float(img.height*2)
+      img.crop(0.0, y, 1.0, 1-y)
+    img.resize(width=c, height=c)
+    thumbnail = img.execute_transforms(output_encoding=images.JPEG)
+    response = http.HttpResponse(content=thumbnail, mimetype='image/jpeg')
+  if not response:
+    response = http.HttpResponse(content=file_record.data, mimetype=mimetype)
+
   expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
-  response = http.HttpResponse(content=file_record.data, mimetype=mimetype)
   response['Cache-Control'] = configuration.FILE_CACHE_CONTROL
   response['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
   return response

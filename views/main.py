@@ -110,7 +110,7 @@ def get_url(request, path_str):
   if isinstance(item, models.FileStore):
     return files.views.send_file(item, request)
 
-  if isinstance(item, models.FileBlobStore):
+  if isinstance(item, models.BlobStore):
     return blobs.views.send_blob(item, request)
 
   return utility.page_not_found(request)
