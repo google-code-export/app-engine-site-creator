@@ -1,6 +1,6 @@
 #!/usr/bin/python2.5
 #
-# Copyright 2008 Google Inc.
+# Copyright 2011 App Engine Site Creator
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-"""Defines the url patterns for the application."""
-
-# pylint: disable-msg=C0103,C0301
-
-from django.conf.urls import defaults
-
-urlpatterns = defaults.patterns(
-    'files.views',
-    (r'add/$', 'upload_file'),
-    defaults.url(r'delete/([\w\-]+)/([^\s/]+)$',
-                  'delete_file', name='delete-file'),
-)

@@ -25,6 +25,7 @@ import StringIO
 from django import http
 from django.core import urlresolvers
 from django.utils import translation
+from django.conf import settings
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -33,7 +34,6 @@ from google.appengine.runtime import apiproxy_errors
 import models
 import utility
 import yaml
-import configuration
 
 
 def admin_required(func):
@@ -202,9 +202,9 @@ def edit_page(request, page_id, parent_id=None):
         'inherits_acl': page.inherits_acl(),
     }
 
-  if configuration.FILE_STORING == 'data':
-    upload_url = urlresolvers.reverse('files.views.upload_file')
-  elif configuration.FILE_STORING == 'blob':
+  upload_url = ''
+
+  if 'blobs' in settings.INSTALLED_APPS:
     try:
       upload_url = blobstore.create_upload_url(
                       urlresolvers.reverse('blobs.views.upload_blob'))
@@ -212,7 +212,7 @@ def edit_page(request, page_id, parent_id=None):
       upload_url = ''
       logging.error('Unable to create Upload URL: %s' % excption)
   else:
-    upload_url = ''
+    upload_url = urlresolvers.reverse('files.views.upload_file')
 
   if not request.POST:
     form = forms.PageEditForm(data=None, instance=page)

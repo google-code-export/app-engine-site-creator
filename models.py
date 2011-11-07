@@ -20,12 +20,12 @@
 from django.core import urlresolvers
 from django.core import validators
 from django.utils import encoding
+from django.conf import settings
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
 
 import utility
 import yaml
-import configuration
 
 
 class AccessControlList(db.Model):
@@ -279,10 +279,10 @@ class Page(File):
   @property
   def filestore_children(self):
     """Returns a query for all of the child FileStore or BlobStore objects."""
-    if configuration.FILE_STORING == 'data':
-      return FileStore.all().filter('parent_page = ', self)
-    if configuration.FILE_STORING == 'blob':
+    if 'blobs' in settings.INSTALLED_APPS:
       return BlobStore.all().filter('parent_page = ', self)
+    else:
+      return FileStore.all().filter('parent_page = ', self)
 
   @property
   def breadcrumbs(self):
@@ -335,6 +335,7 @@ class FileStoreData(db.Model):
 
   data = db.BlobProperty()
   modified = db.DateTimeProperty(auto_now=True)
+  size = db.IntegerProperty()
 
 
 class FileStore(File):
@@ -397,6 +398,19 @@ class FileStore(File):
       self.blob_data.delete()
     super(FileStore, self).delete()
 
+  def __get_size(self):
+    """Gets size of a file."""
+    if self.blob_data:
+      return self.blob_data.size
+
+  def __set_size(self, size):
+    """Sets size of a file."""
+    if self.blob_data:
+      self.blob_data.size = size
+      self.blob_data.put()
+
+  size = property(__get_size, __set_size)
+
 
 class BlobStore(File):
   # pylint: disable-msg=R0904
@@ -404,7 +418,6 @@ class BlobStore(File):
 
   is_hidden = db.BooleanProperty(default=False)
   url_data = db.LinkProperty()
-  url_thumb = db.LinkProperty()
   blob_data = blobstore.BlobReferenceProperty()
 
   def __get_blob_key(self):
@@ -444,6 +457,13 @@ class BlobStore(File):
     if self.blob_data:
       self.blob_data.delete()
     super(BlobStore, self).delete()
+
+  def __get_size(self):
+    """Gets size of a file."""
+    if self.blob_data:
+      return self.blob_data.size
+
+  size = property(__get_size)
 
 
 class UserProfile(db.Model):

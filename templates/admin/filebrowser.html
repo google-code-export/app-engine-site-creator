@@ -1,0 +1,54 @@
+<html>
+<head>
+<title>File Browser</title>
+<style type="text/css">
+  table {
+    width: 100%;
+  }
+
+  tr {
+    cursor: pointer;
+  }
+
+  tr.row1 {
+    background-color: #f5f5f5;
+  }
+
+  tr.row2 {
+    background-color: #ffffff;
+  }
+
+  td {
+    padding: 5px;
+  }
+
+  td.size {
+    color: #4c4c4c;
+    text-align: right;
+  }
+</style>
+<script type="text/javascript">
+
+function SelectFile( fileUrl )
+{
+// window.opener.SetUrl( url, width, height, alt);
+window.opener.SetUrl( fileUrl ) ;
+window.close() ;
+}
+</script>
+</head>
+<body>
+<table>
+{% for file in files %}
+    {% if file.url %}
+        <tr class="{% cycle 'row1' 'row2' %}" onclick="SelectFile('{{ file.url }}');">
+    {% else %}
+        <tr class="{% cycle 'row1' 'row2' %}" onclick="SelectFile('{% url views.main.get_url file.path %}');">
+    {% endif %}
+        <td style="background-image: url({{ file.icon }}); background-repeat:no-repeat; background-position: 4px center; text-indent: 20px;">{{ file.name }}</td>
+        <td class="size"><i>{{ file.size|filesizeformat }}</i></td>
+    </tr>
+{% endfor %}
+</table>
+</body>
+</html>

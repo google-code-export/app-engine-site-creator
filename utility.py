@@ -231,3 +231,7 @@ def set_up_data_store():
   root.acl = acl
   root.put()
   return root
+
+# Definitions of file extensions for image and flash files.
+image_ext = ('jpg', 'gif', 'jpeg', 'png', 'bmp', 'webp')
+flash_ext = ('swf', 'flv')

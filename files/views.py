@@ -61,6 +61,7 @@ def upload_file(request):
   url = None
   if request.FILES and 'attachment' in request.FILES:
     file_name = request.FILES['attachment'].name
+    file_size = request.FILES['attachment'].size
     file_data = request.FILES['attachment'].read()
   elif 'url' in request.POST:
     url = request.POST['url']
@@ -85,6 +86,7 @@ def upload_file(request):
 
   if file_data:
     file_record.data = db.Blob(file_data)
+    file_record.size = int(file_size)
   elif url:
     file_record.url = db.Link(url)
 
@@ -122,6 +124,9 @@ def delete_file(request, page_id, file_id):
 
 def send_file(file_record, request):
   """Sends a given file to a user if they have access rights.
+     Images can be transformed if GET parameter has been added to the URL:
+     - s=<value in pixels> - for resize image
+     - c=<value in pixels> - for crop image
 
   Args:
     file_record: The file to send to the user
@@ -132,22 +137,27 @@ def send_file(file_record, request):
 
   """
   profile = request.profile
+  content = file_record.data
   mimetype = mimetypes.guess_type(file_record.name)[0]
+  file_ext = file_record.name.lower().split('.')[-1]
 
   if not file_record.user_can_read(profile):
     logging.warning('User %s made an invalid attempt to access file %s' %
                     (profile.email, file_record.name))
     return utility.forbidden(request)
 
-  response = None
-  if request.GET.get('s'):
+  if request.GET.get('s') and file_ext in utility.image_ext:
+    if not request.GET.get('s').isdigit():
+      return utility.page_not_found(request)
     s = int(request.GET.get('s'))
     img = images.Image(file_record.data)
     if img.width > s and img.height > s:
       img.resize(width=s, height=s)
-      thumbnail = img.execute_transforms(output_encoding=images.JPEG)
-      response = http.HttpResponse(content=thumbnail, mimetype='image/jpeg')
-  elif request.GET.get('c'):
+      content = img.execute_transforms()
+      mimetype = 'image/png'
+  elif request.GET.get('c') and file_ext in utility.image_ext:
+    if not request.GET.get('c').isdigit():
+      return utility.page_not_found(request)
     c = int(request.GET.get('c'))
     img = images.Image(file_record.data)
     if img.width > img.height:
@@ -157,10 +167,14 @@ def send_file(file_record, request):
       y = (img.height-img.width)/float(img.height*2)
       img.crop(0.0, y, 1.0, 1-y)
     img.resize(width=c, height=c)
-    thumbnail = img.execute_transforms(output_encoding=images.JPEG)
-    response = http.HttpResponse(content=thumbnail, mimetype='image/jpeg')
-  if not response:
-    response = http.HttpResponse(content=file_record.data, mimetype=mimetype)
+    content = img.execute_transforms()
+    mimetype = 'image/png'
+
+  response = http.HttpResponse(content=content, mimetype=mimetype)
+
+  if not file_ext in utility.image_ext + utility.flash_ext:
+    response['Content-Disposition'] = ('attachment; filename=%s' %
+                                        file_record.name)
 
   expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
   response['Cache-Control'] = configuration.FILE_CACHE_CONTROL

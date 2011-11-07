@@ -92,6 +92,14 @@
       var oFCKeditor = new FCKeditor('editorHtml');
       oFCKeditor.BasePath = "/fckeditor/";
       oFCKeditor.Config["CustomConfigurationsPath"] = "/static/js/fck_config.js";
+      {% if page.key.id %}
+        oFCKeditor.Config["LinkBrowser"] = true;
+        oFCKeditor.Config["LinkBrowserURL"] = "{% url filebrowser page.key.id %}";
+        oFCKeditor.Config["ImageBrowser"] = true;
+        oFCKeditor.Config["ImageBrowserURL"] = "{% url filebrowser page.key.id %}?Type=Image";
+        oFCKeditor.Config["FlashBrowser"] = true;
+        oFCKeditor.Config["FlashBrowserURL"] = "{% url filebrowser page.key.id %}?Type=Flash";
+      {% endif %}
       oFCKeditor.Height = 328;
       oFCKeditor.ToolbarSet = 'AESC_Toolbar';
       oFCKeditor.ReplaceTextarea();
@@ -183,14 +191,9 @@
       {% endif %}
           {{ file.name }}</a>
       &nbsp;
-      {% if configuration.FILE_STORING == "data" %}
-        <a href="{% url file-delete page.key.id,file.key.id %}"
-      {% endif %}
-      {% if configuration.FILE_STORING == "blob" %}
-        <a href="{% url blob-delete page.key.id,file.key.id %}"
-      {% endif %}
-         title="{% trans "delete" %} {{file.name}}">
-        <img src="/static/images/trash.gif"></a>
+      <a href="{% url delete-file page.key.id,file.key.id %}"
+      title="{% trans "delete" %} {{file.name}}">
+      <img src="/static/images/trash.gif"></a>
       {% if file.is_hidden %}
         <i>hidden</i>
       {% endif %}
@@ -218,9 +221,6 @@
       {% trans "Upload a file" %}: <br>
       <div style="padding-left: 40px; padding-top: 20px;">
         <input type="file" name="attachment"/ > <p>
-        {% if configuration.FILE_STORING == "blob" %}
-          <input type="checkbox" name="thumbnail" /> &nbsp; {% trans "Create a URL for thumbnails" %} <br>
-        {% endif %}
         <input type="checkbox" name="hidden" /> &nbsp; {% trans "Don't show file in attachments" %} <br><br>
         <input type="submit" value="{% trans "Upload" %}" />
       </div>

@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-"""Views for blobs management."""
+"""Views for thr Blobstore management."""
 
 import cgi
 import datetime
@@ -34,7 +34,7 @@ import configuration
 
 
 def upload_blob(request):
-  """Reads a file from POST data and stores it in the db.
+  """Reads a file from POST data and stores it in the Blobstore.
 
   Args:
     request: The request object
@@ -80,7 +80,7 @@ def upload_blob(request):
     validate = validators.URLValidator()
     try:
       validate(url)
-    except exceptions.ValidationError, excption:
+    except exceptions.ValidationError:
       return utility.edit_updated_page(page_id, tab_name='files')
 
   file_record = page.get_attachment(file_name)
@@ -96,11 +96,6 @@ def upload_blob(request):
   # Determine whether to list the file when the page is viewed
   file_record.is_hidden = 'hidden' in fields
 
-  thumb_images = ['image/bmp', 'image/gif', 'image/jpeg', 'image/png',
-                  'image/tiff', 'image/vnd.microsoft.icon']
-  if 'thumbnail' in fields and file_record.blob_data.content_type in thumb_images:
-    file_record.url_thumb = db.Link(images.get_serving_url(file_record.blob_key))
-
   file_record.put()
   utility.clear_memcache()
 
@@ -108,7 +103,7 @@ def upload_blob(request):
 
 
 def delete_blob(request, page_id, file_id):
-  """Removes a specified file from the database.
+  """Removes a specified file from the Blobstore.
 
   Args:
     request: The request object
@@ -132,6 +127,9 @@ def delete_blob(request, page_id, file_id):
 
 def send_blob(file_record, request):
   """Sends a given file to a user if they have access rights.
+     Images can be transformed if GET parameter has been added to the URL:
+     - s=<value in pixels> - for resize image
+     - c=<value in pixels> - for crop image
 
   Args:
     file_record: The file to send to the user
@@ -142,17 +140,55 @@ def send_blob(file_record, request):
 
   """
   profile = request.profile
+  content = None
+  mimetype = file_record.blob_data.content_type
+  file_ext = file_record.name.lower().split('.')[-1]
 
   if not file_record.user_can_read(profile):
     logging.warning('User %s made an invalid attempt to access file %s' %
                     (profile.email, file_record.name))
     return utility.forbidden(request)
 
-  resource = file_record.blob_key
-  blob_info = blobstore.BlobInfo.get(resource)
-  response = http.HttpResponse()
-  response[blobstore.BLOB_KEY_HEADER] = resource
-  response['Content-Type'] = blob_info.content_type
+  if request.GET.get('s') and file_ext in utility.image_ext:
+    if not request.GET.get('s').isdigit():
+      return utility.page_not_found(request)
+    s = int(request.GET.get('s'))
+    img = images.Image(blob_key=file_record.blob_key)
+    img.resize(width=s, height=s)
+    thumb = img.execute_transforms() # needed to run before you get the metadata
+    metadata = img.get_original_metadata()
+    if metadata['ImageWidth'] > s and metadata['ImageLength'] > s:
+      content = thumb
+      mimetype = 'image/png'
+  elif request.GET.get('c') and file_ext in utility.image_ext:
+    if not request.GET.get('c').isdigit():
+      return utility.page_not_found(request)
+    c = int(request.GET.get('c'))
+    img = images.Image(blob_key=file_record.blob_key)
+    img.resize(width=c, height=c)
+    img.execute_transforms() # needed to run before you get the metadata
+    metadata = img.get_original_metadata()
+    width, height = metadata['ImageWidth'], metadata['ImageLength']
+    if width > height:
+      x = (width-height)/float(width*2)
+      img.crop(x, 0.0, 1-x, 1.0)
+    if width < height:
+      y = (height-width)/float(height*2)
+      img.crop(0.0, y, 1.0, 1-y)
+    img.resize(width=c, height=c)
+    content = img.execute_transforms()
+    mimetype = 'image/png'
+
+  response = http.HttpResponse(mimetype=mimetype)
+
+  if content:
+    response.write(content)
+  else:
+    response[blobstore.BLOB_KEY_HEADER] = file_record.blob_key
+
+  if not file_ext in utility.image_ext + utility.flash_ext:
+    response['Content-Disposition'] = ('attachment; filename=%s' %
+                                        file_record.name)
 
   expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
   response['Cache-Control'] = configuration.FILE_CACHE_CONTROL

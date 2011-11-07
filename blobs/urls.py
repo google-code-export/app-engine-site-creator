@@ -25,5 +25,5 @@ urlpatterns = defaults.patterns(
     'blobs.views',
     (r'add/$', 'upload_blob'),
     defaults.url(r'delete/([\w\-]+)/([^\s/]+)$',
-                  'delete_blob', name='blob-delete'),
+                  'delete_blob', name='delete-file'),
 )
