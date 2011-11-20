@@ -21,16 +21,17 @@ import csv
 import functools
 import logging
 import StringIO
+import cgi
 
 from django import http
 from django.core import urlresolvers
+from django.core import validators
+from django.core import exceptions
 from django.utils import translation
-from django.conf import settings
 import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
-from google.appengine.runtime import apiproxy_errors
 import models
 import utility
 import yaml
@@ -202,17 +203,8 @@ def edit_page(request, page_id, parent_id=None):
         'inherits_acl': page.inherits_acl(),
     }
 
-  upload_url = ''
-
-  if 'blobs' in settings.INSTALLED_APPS:
-    try:
-      upload_url = blobstore.create_upload_url(
-                      urlresolvers.reverse('blobs.views.upload_blob'))
-    except apiproxy_errors.FeatureNotEnabledError, excption:
-      upload_url = ''
-      logging.error('Unable to create Upload URL: %s' % excption)
-  else:
-    upload_url = urlresolvers.reverse('files.views.upload_file')
+  upload_url = blobstore.create_upload_url(
+                      urlresolvers.reverse('views.admin.upload_file'))
 
   if not request.POST:
     form = forms.PageEditForm(data=None, instance=page)
@@ -271,6 +263,103 @@ def new_page(request, parent_id):
   return edit_page(request, None, parent_id=parent_id)
 
 
+def upload_file(request):
+  """Reads a file from POST data and stores it in the db.
+
+  Args:
+    request: The request object
+
+  Returns:
+    A http redirect to the edit form for the parent page
+
+  """
+  fields = cgi.FieldStorage()
+  blob_info = None
+  if fields.has_key('attachment'):
+    blob_info = blobstore.parse_blob_info(fields['attachment'])
+
+  if not fields.has_key('page_id'):
+    if blob_info:
+      blob_info.delete()
+    return utility.page_not_found(request)
+
+  page_id = fields['page_id'].value
+  page = models.Page.get_by_id(int(page_id))
+  
+  if not page:
+    logging.warning('admin.upload_file was passed an invalid page id %r',
+                    page_id)
+    if blob_info:
+      blob_info.delete()
+    return utility.page_not_found(request)
+
+  if not page.user_can_write(request.profile):
+    if blob_info:
+      blob_info.delete()
+    return utility.forbidden(request)
+
+  file_name = None
+  url = None
+  if blob_info:
+    file_name = blob_info.filename
+  elif 'url' in fields:
+    url = fields['url'].value
+    file_name = url.split('/')[-1]
+  else:
+    return utility.page_not_found(request)
+
+  if not url and not file_name:
+    url = 'invalid URL'
+
+  if url:
+    validate = validators.URLValidator()
+    try:
+      validate(url)
+    except exceptions.ValidationError, excption:
+      return utility.page_not_found(request, excption.messages[0])
+
+  file_record = page.get_attachment(file_name)
+
+  if not file_record:
+    file_record = models.FileStore(name=file_name, parent_page=page)
+
+  if blob_info:
+    file_record.blob_key = blob_info.key()
+  elif url:
+    file_record.url = db.Link(url)
+
+  # Determine whether to list the file when the page is viewed
+  file_record.is_hidden = 'hidden' in fields
+
+  file_record.put()
+  utility.clear_memcache()
+
+  return utility.edit_updated_page(page_id, tab_name='files')
+
+
+def delete_file(request, page_id, file_id):
+  """Removes a specified file from the database.
+
+  Args:
+    request: The request object
+    page_id: ID of the page the file is attached to.
+    file_id: Id of the file.
+
+  Returns:
+    A Django HttpResponse object.
+
+  """
+  record = models.FileStore.get_by_id(int(file_id))
+  if record:
+    if not record.user_can_write(request.profile):
+      return utility.forbidden(request)
+
+    record.delete()
+    return utility.edit_updated_page(page_id, tab_name='files')
+  else:
+    return utility.page_not_found(request)
+
+
 def delete_page(request, page_id):
   """Removes a page from the database.
 
@@ -297,6 +386,48 @@ def delete_page(request, page_id):
 
   url = urlresolvers.reverse('views.admin.index')
   return http.HttpResponseRedirect(url)
+
+
+def filebrowser(request, page_id):
+  """File Browser for built-in FCKeditor.
+
+  Args:
+    request: The request object
+    page_id: ID of the page the files is attached to.
+
+  Returns:
+    A Django HttpResponse object.
+
+  """
+
+  page = None
+  files = None
+  files_type = request.GET.get('Type')
+
+  if page_id:
+    page = models.Page.get_by_id(int(page_id))
+
+    if not page:
+      return utility.page_not_found(request)
+
+    if not page.user_can_write(request.profile):
+      return utility.forbidden(request)
+
+    files = page.attached_files()
+
+    if files_type == 'Image':
+      files = [item for item in files
+               if item.name.lower().split('.')[-1] in utility.image_ext]
+
+    if files_type == 'Flash':
+      files = [item for item in files
+               if item.name.lower().split('.')[-1] in utility.flash_ext]
+
+    for item in files:
+      icon = '/static/images/fileicons/%s.png' % item.name.lower().split('.')[-1]
+      item.icon = icon
+
+  return utility.respond(request, 'admin/filebrowser', {'files': files})
 
 
 @super_user_required

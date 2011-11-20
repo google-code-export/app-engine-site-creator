@@ -94,11 +94,11 @@
       oFCKeditor.Config["CustomConfigurationsPath"] = "/static/js/fck_config.js";
       {% if page.key.id %}
         oFCKeditor.Config["LinkBrowser"] = true;
-        oFCKeditor.Config["LinkBrowserURL"] = "{% url filebrowser page.key.id %}";
+        oFCKeditor.Config["LinkBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}";
         oFCKeditor.Config["ImageBrowser"] = true;
-        oFCKeditor.Config["ImageBrowserURL"] = "{% url filebrowser page.key.id %}?Type=Image";
+        oFCKeditor.Config["ImageBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}?Type=Image";
         oFCKeditor.Config["FlashBrowser"] = true;
-        oFCKeditor.Config["FlashBrowserURL"] = "{% url filebrowser page.key.id %}?Type=Flash";
+        oFCKeditor.Config["FlashBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}?Type=Flash";
       {% endif %}
       oFCKeditor.Height = 328;
       oFCKeditor.ToolbarSet = 'AESC_Toolbar';
@@ -191,9 +191,9 @@
       {% endif %}
           {{ file.name }}</a>
       &nbsp;
-      <a href="{% url delete-file page.key.id,file.key.id %}"
-      title="{% trans "delete" %} {{file.name}}">
-      <img src="/static/images/trash.gif"></a>
+      <a href="{% url views.admin.delete_file page.key.id,file.key.id %}"
+         title="{% trans "delete" %} {{file.name}}">
+        <img src="/static/images/trash.gif"></a>
       {% if file.is_hidden %}
         <i>hidden</i>
       {% endif %}

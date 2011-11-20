@@ -17,16 +17,16 @@
 
 """Main views for viewing pages and downloading files."""
 
+import datetime
 import logging
 
 import configuration
 from django import http
 from django.core import urlresolvers
 from django.utils import simplejson
+from google.appengine.api import images
 import models
 import utility
-import blobs.views
-import files.views
 
 
 def send_page(page, request):
@@ -64,6 +64,79 @@ def send_page(page, request):
 
   return utility.respond(request, template, {'page': page, 'files': files,
                                              'is_editor': is_editor})
+
+
+def send_file(file_record, request):
+  """Sends a given file to a user if they have access rights.
+     Images can be transformed if GET parameter has been added to the URL:
+     - s=<value in pixels> - for resize image
+     - c=<value in pixels> - for crop image
+
+  Args:
+    file_record: The file to send to the user
+    request: The Django request object
+
+  Returns:
+    A Django HttpResponse containing the requested file, or an error message.
+
+  """
+  profile = request.profile
+
+  if not file_record.user_can_read(profile):
+    logging.warning('User %s made an invalid attempt to access file %s' %
+                    (profile.email, file_record.name))
+    return utility.forbidden(request)
+
+  content = None
+  mimetype = file_record.blob_data.content_type
+  file_ext = file_record.name.lower().split('.')[-1]
+
+  if request.GET.get('s') and file_ext in utility.image_ext:
+    if not request.GET.get('s').isdigit():
+      return utility.page_not_found(request)
+    s = int(request.GET.get('s'))
+    img = images.Image(blob_key=file_record.blob_key)
+    img.resize(width=s, height=s)
+    thumb = img.execute_transforms() # needed to run before you get the metadata
+    metadata = img.get_original_metadata()
+    if metadata['ImageWidth'] > s and metadata['ImageLength'] > s:
+      content = thumb
+      mimetype = 'image/png'
+  elif request.GET.get('c') and file_ext in utility.image_ext:
+    if not request.GET.get('c').isdigit():
+      return utility.page_not_found(request)
+    c = int(request.GET.get('c'))
+    img = images.Image(blob_key=file_record.blob_key)
+    img.resize(width=c, height=c)
+    img.execute_transforms() # needed to run before you get the metadata
+    metadata = img.get_original_metadata()
+    width, height = metadata['ImageWidth'], metadata['ImageLength']
+    img = images.Image(blob_key=file_record.blob_key)
+    if width > height:
+      x = (width-height)/float(width*2)
+      img.crop(x, 0.0, 1-x, 1.0)
+    if width < height:
+      y = (height-width)/float(height*2)
+      img.crop(0.0, y, 1.0, 1-y)
+    img.resize(width=c, height=c)
+    content = img.execute_transforms()
+    mimetype = 'image/png'
+
+  response = http.HttpResponse(mimetype=mimetype)
+
+  if content:
+    response.write(content)
+  else:
+    response['X-AppEngine-BlobKey'] = file_record.blob_key
+
+  if not file_ext in utility.image_ext + utility.flash_ext:
+    response['Content-Disposition'] = ('attachment; filename=%s' %
+                                        file_record.name)
+
+  expires = datetime.datetime.now() + configuration.FILE_CACHE_TIME
+  response['Cache-Control'] = configuration.FILE_CACHE_CONTROL
+  response['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
+  return response
 
 
 def get_url(request, path_str):
@@ -108,10 +181,7 @@ def get_url(request, path_str):
     return send_page(item, request)
 
   if isinstance(item, models.FileStore):
-    return files.views.send_file(item, request)
-
-  if isinstance(item, models.BlobStore):
-    return blobs.views.send_blob(item, request)
+    return send_file(item, request)
 
   return utility.page_not_found(request)
 

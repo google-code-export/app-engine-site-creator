@@ -20,7 +20,6 @@
 from django.core import urlresolvers
 from django.core import validators
 from django.utils import encoding
-from django.conf import settings
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
 
@@ -278,11 +277,8 @@ class Page(File):
 
   @property
   def filestore_children(self):
-    """Returns a query for all of the child FileStore or BlobStore objects."""
-    if 'blobs' in settings.INSTALLED_APPS:
-      return BlobStore.all().filter('parent_page = ', self)
-    else:
-      return FileStore.all().filter('parent_page = ', self)
+    """Returns a query for all of the child FileStore objects."""
+    return FileStore.all().filter('parent_page = ', self)
 
   @property
   def breadcrumbs(self):
@@ -330,89 +326,7 @@ class Page(File):
     return file_list
 
 
-class FileStoreData(db.Model):
-  """A class that holds the data for a FileStore object."""
-
-  data = db.BlobProperty()
-  modified = db.DateTimeProperty(auto_now=True)
-  size = db.IntegerProperty()
-
-
 class FileStore(File):
-  # pylint: disable-msg=R0904
-  """A class that represents a single file attached to a page.
-
-  This class contains a property data which abstracts the underlying child
-  FileStoreData object.  The data property should be treated as though
-  it were a BlobProperty.  This prevents the Blob being read into memory
-  until it is actually referenced.
-
-  """
-
-  is_hidden = db.BooleanProperty(default=False)
-  url_data = db.LinkProperty()
-  blob_data = db.ReferenceProperty(FileStoreData)
-
-  def __get_data(self):
-    """Retrieves the data from the child object."""
-    return self.blob_data.data
-
-  def __set_data(self, data):
-    """Sets the data on the child object, creating one if necessary."""
-    if not data:
-      if self.blob_data:
-        self.blob_data.delete()
-        self.blob_data = None
-        self.put()
-      return
-
-    if not self.blob_data:
-      file_store_data = FileStoreData()
-      file_store_data.put()
-      self.blob_data = file_store_data
-      self.put()
-    self.blob_data.data = data
-    self.blob_data.put()
-    self.url = None
-    self.put()
-
-  data = property(__get_data, __set_data)
-
-  def __get_url(self):
-    """Exposes the url property."""
-    return self.url_data
-
-  def __set_deal(self, link):
-    """Sets the url property and removes any data associated with the file."""
-    if link:
-      self.url_data = link
-      self.data = None
-    else:
-      self.url_data = None
-
-  url = property(__get_url, __set_deal)
-
-  def delete(self):
-    """Overridden to ensure child objects are cleaned up on delete."""
-    if self.blob_data:
-      self.blob_data.delete()
-    super(FileStore, self).delete()
-
-  def __get_size(self):
-    """Gets size of a file."""
-    if self.blob_data:
-      return self.blob_data.size
-
-  def __set_size(self, size):
-    """Sets size of a file."""
-    if self.blob_data:
-      self.blob_data.size = size
-      self.blob_data.put()
-
-  size = property(__get_size, __set_size)
-
-
-class BlobStore(File):
   # pylint: disable-msg=R0904
   """A class that represents a single file attached to a page. """
 
@@ -421,20 +335,21 @@ class BlobStore(File):
   blob_data = blobstore.BlobReferenceProperty()
 
   def __get_blob_key(self):
-    """Retrieves the blob key from the child object."""
-    return str(self.blob_data.key())
+    """Retrieves the BlobKey of a Blobstore value."""
+    return self.blob_data.key()
 
   def __set_blob_key(self, blob_key):
-    """Sets the data on the child object, creating one if necessary."""
-    if not blob_key:
-      if self.blob_data:
-        self.blob_data.delete()
-        self.blob_data = None
-        self.put()
-      return
+    """Creates a reference to BlobInfo entity and deleting the old entity
+       if exists.
 
+    Args:
+      blob_key: the BlobKey value
+
+    """
+    if self.blob_data:
+      self.blob_data.delete()
     self.blob_data = blob_key
-    self.url = None
+    self.url_data = None
     self.put()
 
   blob_key = property(__get_blob_key, __set_blob_key)
@@ -445,10 +360,10 @@ class BlobStore(File):
 
   def __set_deal(self, link):
     """Sets the url property and removes any data associated with the file."""
-    if link:
-      self.url_data = link
-    else:
-      self.url_data = None
+    if self.blob_data:
+      self.blob_data.delete()
+      self.blob_data = None
+    self.url_data = link
 
   url = property(__get_url, __set_deal)
 
@@ -456,10 +371,10 @@ class BlobStore(File):
     """Overridden to ensure child objects are cleaned up on delete."""
     if self.blob_data:
       self.blob_data.delete()
-    super(BlobStore, self).delete()
+    super(FileStore, self).delete()
 
   def __get_size(self):
-    """Gets size of a file."""
+    """Returns the file size."""
     if self.blob_data:
       return self.blob_data.size
 

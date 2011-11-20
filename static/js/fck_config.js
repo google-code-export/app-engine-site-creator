@@ -36,6 +36,3 @@ FCKConfig.ImageBrowser = false;
 FCKConfig.ImageUpload = false;
 FCKConfig.LinkBrowser = false;
 FCKConfig.FlashBrowser = false;
-FCKConfig.ImageBrowserWindowWidth = '500';
-FCKConfig.LinkBrowserWindowWidth = '500';
-FCKConfig.FlashBrowserWindowWidth = '500';

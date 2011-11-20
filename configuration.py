@@ -33,6 +33,7 @@ FOOTER_HTML = (
 FILE_CACHE_CONTROL = 'private, max-age=86400'
 FILE_CACHE_TIME = datetime.timedelta(days=1)
 
+
 # Title for the website
 SYSTEM_TITLE = 'App Engine Site Creator'
 

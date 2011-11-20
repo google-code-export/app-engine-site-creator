@@ -35,9 +35,3 @@ TEMPLATE_DIRS = (
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
 )
-
-INSTALLED_APPS = (
-    'files',
-    #'blobs',
-    'filebrowser'
-)
