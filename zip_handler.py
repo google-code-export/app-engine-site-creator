@@ -25,12 +25,10 @@ from google.appengine.ext.webapp import util
 
 def main():
   """Sets up handlers for the zip files."""
-  file_icons = zipserve.make_zip_handler('static/images/fileicons.zip')
   fck_editor = zipserve.make_zip_handler('third_party/fckeditor.zip')
   
   application = webapp.WSGIApplication(
-      [('/static/images/fileicons/(.*)', file_icons),
-       ('/fckeditor/(.*)', fck_editor),
+      [('/fckeditor/(.*)', fck_editor),
       ])
   util.run_wsgi_app(application)
 

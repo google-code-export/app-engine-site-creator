@@ -181,7 +181,8 @@ def edit_page(request, page_id, parent_id=None):
     files = list(
         models.FileStore.all().filter('parent_page =', page).order('name'))
     for item in files:
-      item.icon = '/static/images/fileicons/%s.png' % item.name.split('.')[-1]
+      ext = item.name.lower().split('.')[-1]
+      item.icon = '/static/images/fileicons/%s.png' % ext
 
   acl_data = None
 

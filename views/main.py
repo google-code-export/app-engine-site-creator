@@ -54,7 +54,7 @@ def send_page(page, request):
   files = [file_obj for file_obj in files if not file_obj.is_hidden]
 
   for item in files:
-    ext = item.name.split('.')[-1]
+    ext = item.name.lower().split('.')[-1]
     item.icon = '/static/images/fileicons/%s.png' % ext
 
   is_editor = page.user_can_write(profile)
