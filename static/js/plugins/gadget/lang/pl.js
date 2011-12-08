@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-// Register the related command.
-FCKCommands.RegisterCommand(
-    'Gadget',
-    new FCKDialogCommand(
-        'Gadget',
-        FCKLang.GadgetDlgTitle,
-        FCKPlugins.Items['gadget'].Path + 'gadget.html',
-        340, 240));
+CKEDITOR.plugins.setLang( 'gadget', 'pl',
+{
+    gadget :
+    {
+        Label : 'Wstaw Gadżet Google',
+        Title : 'Właściwości Gadżetu',
+        Url : 'Adres URL Gadżetu',
+        Height : 'Wysokość Gadżetu',
+        Width : 'Szerokość Gadżetu',
 
-// Create the "Gadget" toolbar button.
-var oGadgetItem = new FCKToolbarButton('Gadget', FCKLang.GadgetBtn);
-oGadgetItem.IconPath = FCKPlugins.Items['gadget'].Path + 'gadget.png' ;
-FCKToolbarItems.RegisterItem('Gadget', oGadgetItem);
+        ErrNoUrl : 'Proszę podać adres URL',
+        ErrNoHeight : 'Proszę podać wysokość',
+        ErrNoWidth : 'Proszę podać szerokość'
+    }
+} );
+

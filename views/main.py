@@ -172,7 +172,8 @@ def get_tree_data(request):
 
   data = {'identifier': 'id', 'label': 'title',
           'items': [get_node_data(models.Page.get_root())]}
-  return http.HttpResponse(simplejson.dumps(data))
+
+  return http.HttpResponse(simplejson.dumps(data), mimetype='application/json')
 
 
 def page_list(request):

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-FCKLang.GadgetBtn = 'Insert Google Gadget';
-FCKLang.GadgetDlgTitle = 'Gadget Properties';
-FCKLang.GadgetDlgUrl = 'Gadget URL';
-FCKLang.GadgetDlgHeight = 'Gadget Height';
-FCKLang.GadgetDlgWidth = 'Gadget Width';
+CKEDITOR.plugins.setLang( 'gadget', 'en',
+{
+    gadget :
+    {
+        Label : 'Insert Google Gadget',
+        Title : 'Gadget Properties',
+        Url : 'Gadget URL',
+        Height : 'Gadget Height',
+        Width : 'Gadget Width',
 
-FCKLang.GadgetErrNoUrl = 'Please provide a URL';
-FCKLang.GadgetErrNoHeight = 'Please provide a height';
-FCKLang.GadgetErrNoWidth = 'Please provide a width';
+        ErrNoUrl : 'Please provide a URL',
+        ErrNoHeight : 'Please provide a height',
+        ErrNoWidth : 'Please provide a width'
+    }
+} );
+
