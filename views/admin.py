@@ -417,16 +417,16 @@ def filebrowser(request, page_id):
 
     if files_type == 'Image':
       files = [item for item in files
-               if item.name.lower().split('.')[-1] in utility.image_ext]
+               if item.name.lower().split('.')[-1] in utility.IMAGE_EXT]
 
     if files_type == 'Flash':
       files = [item for item in files
-               if item.name.lower().split('.')[-1] in utility.flash_ext]
+               if item.name.lower().split('.')[-1] in utility.FLASH_EXT]
 
     for item in files:
       ext = item.name.lower().split('.')[-1]
       item.icon = '/static/images/fileicons/%s.png' % ext
-      if ext in utility.image_ext:
+      if ext in utility.IMAGE_EXT:
         item.is_image = True
 
   return utility.respond(request, 'admin/filebrowser', {'files': files})

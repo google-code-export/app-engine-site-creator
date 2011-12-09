@@ -233,5 +233,5 @@ def set_up_data_store():
   return root
 
 # Definitions of file extensions for image and flash files.
-image_ext = ('jpg', 'gif', 'jpeg', 'png', 'bmp', 'webp')
-flash_ext = ('swf', 'flv')
+IMAGE_EXT = ('jpg', 'gif', 'jpeg', 'png', 'bmp', 'webp')
+FLASH_EXT = ('swf', 'flv')

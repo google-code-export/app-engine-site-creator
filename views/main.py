@@ -69,9 +69,14 @@ def send_page(page, request):
 def send_file(file_record, request):
   """Sends a given file to a user if they have access rights.
 
-     Images can be transformed if GET parameter has been added to the URL:
-     - size=<value in pixels> - for resize image
-     - crop=<value in pixels> - for crop image
+  Images can be transformed if GET parameter has been added to the URL:
+  - size=<value in pixels> - resizes the image to the supplied value, applying
+    the specified size to the image's longest dimension and preserving
+    the original aspect ratio.
+  - crop=<value in pixels> - the image will be cropped after resize to fit the
+    specified size.
+  For example, to crop an image, the image URL looks like this:
+    http://example.com/image.jpg/?crop=200
 
   Args:
     file_record: The file to send to the user
@@ -81,18 +86,6 @@ def send_file(file_record, request):
     A Django HttpResponse containing the requested file, or an error message.
 
   """
-  def thumbnail(image_obj, filetype):
-    """Creates the image thumbnails."""
-    if filetype in ('png', 'gif'):
-      return (image_obj.execute_transforms(output_encoding=images.PNG),
-             'image/png')
-    elif filetype == 'webp':
-      return (image_obj.execute_transforms(output_encoding=images.WEBP),
-             'image/webp')
-    else:
-      return (image_obj.execute_transforms(output_encoding=images.JPEG),
-             'image/jpeg')
-
   profile = request.profile
 
   if not file_record.user_can_read(profile):
@@ -104,46 +97,27 @@ def send_file(file_record, request):
   mimetype = file_record.blob_data.content_type
   file_ext = file_record.name.lower().split('.')[-1]
 
-  if request.GET.get('size') and file_ext in utility.image_ext:
+  if request.GET.get('size') and file_ext in utility.IMAGE_EXT:
     if not request.GET.get('size').isdigit():
       return utility.page_not_found(request)
-    s = int(request.GET.get('size'))
-    key = "%s?size=%s" % (request.path, s)
-    thumb = utility.memcache_get(key)
-    if thumb:
-      content, mimetype = thumb
+    size = int(request.GET.get('size'))
+    key = "thumbnail:%s?size=%s" % (request.path, size)
+    thumbnail = utility.memcache_get(key)
+    if thumbnail:
+      content, mimetype = thumbnail
     else:
-      img = images.Image(blob_key=file_record.blob_key)
-      img.resize(width=s, height=s)
-      thumb, thumb_mimetype = thumbnail(img,file_ext)
-      metadata = img.get_original_metadata()
-      if metadata['ImageWidth'] > s or metadata['ImageLength'] > s:
-        content = thumb
-        mimetype = thumb_mimetype
+      content, mimetype = resize_image(file_record, size)
       utility.memcache_set(key, (content, mimetype))
-  elif request.GET.get('crop') and file_ext in utility.image_ext:
+  elif request.GET.get('crop') and file_ext in utility.IMAGE_EXT:
     if not request.GET.get('crop').isdigit():
       return utility.page_not_found(request)
-    c = int(request.GET.get('crop'))
-    key = "%s?crop=%s" % (request.path, c)
-    thumb = utility.memcache_get(key)
-    if thumb:
-      content, mimetype = thumb
+    size = int(request.GET.get('crop'))
+    key = "thumbnail:%s?crop=%s" % (request.path, size)
+    thumbnail = utility.memcache_get(key)
+    if thumbnail:
+      content, mimetype = thumbnail
     else:
-      img = images.Image(blob_key=file_record.blob_key)
-      img.resize(width=c, height=c)
-      img.execute_transforms() # needed to run before you get the metadata
-      metadata = img.get_original_metadata()
-      width, height = metadata['ImageWidth'], metadata['ImageLength']
-      img = images.Image(blob_key=file_record.blob_key)
-      if width > height:
-        x = (width-height)/float(width*2)
-        img.crop(x, 0.0, 1-x, 1.0)
-      if width < height:
-        y = (height-width)/float(height*2)
-        img.crop(0.0, y, 1.0, 1-y)
-      img.resize(width=c, height=c)
-      content, mimetype = thumbnail(img, file_ext)
+      content, mimetype = resize_image(file_record, size, crop=True)
       utility.memcache_set(key, (content, mimetype))
 
   response = http.HttpResponse(content=content, mimetype=mimetype)
@@ -151,7 +125,7 @@ def send_file(file_record, request):
   if not content:
     response['X-AppEngine-BlobKey'] = file_record.blob_key
 
-  if not file_ext in utility.image_ext + utility.flash_ext:
+  if not file_ext in utility.IMAGE_EXT + utility.FLASH_EXT:
     response['Content-Disposition'] = ('attachment; filename=%s' %
                                         file_record.name)
 
@@ -247,3 +221,40 @@ def get_tree_data(request):
 def page_list(request):
   """List all pages."""
   return utility.respond(request, 'sitemap')
+
+
+def resize_image(file_record, size, crop=False):
+  """Resizes the image maintaining the aspect ratio.
+
+  Args:
+    file_record: The image file to resize.
+    size: The size (in pixels) to change the image dimensions to.
+    crop: If True the image is cropped to fit the specified dimensions.
+
+  Returns:
+    A tuple of image data after the transformations have been performed on it
+    and its mimetype.
+  """
+  content_type = file_record.blob_data.content_type
+  img = images.Image(blob_key=file_record.blob_key)
+  img.resize(width=size, height=size, crop_to_fit=crop)
+
+  if content_type in ('image/png', 'image/gif'):
+    thumbnail = img.execute_transforms(output_encoding=images.PNG)
+    thumbnail_mimetype = 'image/png'
+  elif content_type == 'image/webp':
+    thumbnail = img.execute_transforms(output_encoding=images.WEBP)
+    thumbnail_mimetype = 'image/webp'
+  else:
+    thumbnail = img.execute_transforms(output_encoding=images.JPEG)
+    thumbnail_mimetype = 'image/jpeg'
+
+  if crop:
+    return thumbnail, thumbnail_mimetype
+
+  # To prevent scaling up checking image dimensions
+  metadata = img.get_original_metadata()
+  if metadata['ImageWidth'] > size or metadata['ImageLength'] > size:
+    return thumbnail, thumbnail_mimetype
+  else:
+    return None, content_type
