@@ -10,10 +10,7 @@ handlers:
     static_files: static/images/favicon.ico
     upload: static/images/favicon.ico
   
-  - url: /static/images/fileicons/.*
-    script: zip_handler.py
-    
-  - url: /fckeditor/.*
+  - url: /ckeditor/.*
     script: zip_handler.py
   
   - url: /static

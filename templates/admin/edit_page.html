@@ -13,9 +13,10 @@
 {% endblock %}
 
 {% block includes %}
-  <script type="text/javascript" src="/fckeditor/fckeditor.js"></script>
+  <script type="text/javascript" src="/ckeditor/ckeditor.js"></script>
+  <script type="text/javascript" src="/static/js/urlify.js"></script>
   <script type="text/javascript"
-          src="http://ajax.googleapis.com/ajax/libs/dojo/1.2.0/dojo/dojo.xd.js"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js"
           djConfig="parseOnLoad:true,isDebug:false"></script>
   <script type="text/javascript">
     dojo.require('dijit.layout.ContentPane');
@@ -89,20 +90,17 @@
     }
     
     function createEditor() {
-      var oFCKeditor = new FCKeditor('editorHtml');
-      oFCKeditor.BasePath = "/fckeditor/";
-      oFCKeditor.Config["CustomConfigurationsPath"] = "/static/js/fck_config.js";
-      {% if page.key.id %}
-        oFCKeditor.Config["LinkBrowser"] = true;
-        oFCKeditor.Config["LinkBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}";
-        oFCKeditor.Config["ImageBrowser"] = true;
-        oFCKeditor.Config["ImageBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}?Type=Image";
-        oFCKeditor.Config["FlashBrowser"] = true;
-        oFCKeditor.Config["FlashBrowserURL"] = "{% url views.admin.filebrowser page.key.id %}?Type=Flash";
-      {% endif %}
-      oFCKeditor.Height = 328;
-      oFCKeditor.ToolbarSet = 'AESC_Toolbar';
-      oFCKeditor.ReplaceTextarea();
+      CKEDITOR.replace( 'editorHtml',
+        {
+          customConfig : '/static/js/ckeditor_config.js',
+          {% if page.key.id %}
+            filebrowserBrowseUrl : '{% url views.admin.filebrowser page.key.id %}',
+            filebrowserImageBrowseUrl : '{% url views.admin.filebrowser page.key.id %}?Type=Image',
+            filebrowserFlashBrowseUrl : '{% url views.admin.filebrowser page.key.id %}?Type=Flash',
+          {% endif %}
+          height : 298,
+          toolbar: 'AESC_Toolbar'
+        });
     }
 
     dojo.addOnLoad(selectTab);
@@ -117,6 +115,7 @@
 <script type="text/javascript">
   function generate_name() {
     str = dojo.byId('id_title').value;
+    str = downcode(str);
     str = str.replace(/ /g, '-');
     str = str.replace(/\W/g, '-');
     str = str.replace(/\-+/g, '-');

@@ -182,7 +182,8 @@ def edit_page(request, page_id, parent_id=None):
       return utility.forbidden(request)
     files = page.attached_files()
     for item in files:
-      item.icon = '/static/images/fileicons/%s.png' % item.name.split('.')[-1]
+      ext = item.name.lower().split('.')[-1]
+      item.icon = '/static/images/fileicons/%s.png' % ext
 
   acl_data = None
 
@@ -429,7 +430,9 @@ def filebrowser(request, page_id):
       if ext in utility.IMAGE_EXT:
         item.is_image = True
 
-  return utility.respond(request, 'admin/filebrowser', {'files': files})
+  return utility.respond(request, 'admin/filebrowser',
+                         {'files': files,
+                          'funcNum': request.GET.get('CKEditorFuncNum')})
 
 
 @super_user_required

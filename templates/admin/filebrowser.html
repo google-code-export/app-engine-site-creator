@@ -34,15 +34,15 @@
         text-align: right;
       }
     </style>
-    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js"
+    djConfig="parseOnLoad:true,isDebug:false"></script>
     <script type="text/javascript">
       dojo.require("dijit.Menu");
 
-      function SelectFile( fileUrl )
+      function SelectFile(fileUrl)
       {
-        // window.opener.SetUrl( url, width, height, alt);
-        window.opener.SetUrl( fileUrl ) ;
-        window.close() ;
+        window.opener.CKEDITOR.tools.callFunction({{ funcNum }}, fileUrl);
+        window.close();
       }
 
     var fileMenu;
