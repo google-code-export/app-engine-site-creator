@@ -66,19 +66,19 @@
       thumbSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Small" %}",
         onClick: function() {
-          SelectFile(fileURL+'?size=100')
+          SelectFile(fileURL+'?size={{ configuration.THUMBNAIL_SIZES.0 }}')
         }
       }));
       thumbSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Medium" %}",
         onClick: function() {
-          SelectFile(fileURL+'?size=250')
+          SelectFile(fileURL+'?size={{ configuration.THUMBNAIL_SIZES.1 }}')
         }
       }));
       thumbSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Large" %}",
         onClick: function() {
-          SelectFile(fileURL+'?size=500')
+          SelectFile(fileURL+'?size={{ configuration.THUMBNAIL_SIZES.2 }}')
         }
       }));
       fileMenu.addChild(new dijit.PopupMenuItem({
@@ -90,19 +90,19 @@
       cropSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Small" %}",
         onClick: function() {
-          SelectFile(fileURL+'?crop=100')
+          SelectFile(fileURL+'?crop={{ configuration.CROP_SIZES.0 }}')
         }
       }));
       cropSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Medium" %}",
         onClick: function() {
-          SelectFile(fileURL+'?crop=200')
+          SelectFile(fileURL+'?crop={{ configuration.CROP_SIZES.1 }}')
         }
       }));
       cropSubMenu.addChild(new dijit.MenuItem({
         label: "{% trans "Large" %}",
         onClick: function() {
-          SelectFile(fileURL+'?crop=400')
+          SelectFile(fileURL+'?crop={{ configuration.CROP_SIZES.2 }}')
         }
       }));
       fileMenu.addChild(new dijit.PopupMenuItem({

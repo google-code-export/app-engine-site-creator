@@ -47,3 +47,8 @@ ANALYTICS_ID = ''
 # 'templates/themes/{FOLDER NAME}' where your customized
 # base and page files should be located
 SYSTEM_THEME_NAME = 'default'
+
+# Thumbnail and crop sizes corresponding to small, medium and large
+# in the context menu of the file browser.
+THUMBNAIL_SIZES = (100, 250, 500)
+CROP_SIZES = (100, 200, 400)
