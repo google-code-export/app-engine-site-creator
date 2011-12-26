@@ -25,8 +25,9 @@ import configuration
 from django import http
 from django.core import urlresolvers
 from django.utils import simplejson
-import models
-import utility
+from google.appengine.api import users
+from aesc import models
+from aesc import utility
 
 
 def send_page(page, request):
@@ -157,11 +158,11 @@ def get_tree_data(request):
             'path': page.path,
             'id': page_id,
             'edit_url': urlresolvers.reverse(
-                'views.admin.edit_page', args=[page_id]),
+                'admin-edit-page', args=[page_id]),
             'child_url': urlresolvers.reverse(
-                'views.admin.new_page', args=[page_id]),
+                'admin-new-page', args=[page_id]),
             'delete_url': urlresolvers.reverse(
-                'views.admin.delete_page', args=[page_id])}
+                'admin-delete-page', args=[page_id])}
     children = []
     for child in page.page_children:
       if child.acl.user_can_read(request.profile):

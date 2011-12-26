@@ -27,11 +27,11 @@ from django.core import urlresolvers
 from django.core import validators
 from django.core import exceptions
 from django.utils import translation
-import forms
+from aesc import forms
 from google.appengine.api import memcache
 from google.appengine.ext import db
-import models
-import utility
+from aesc import models
+from aesc import utility
 import yaml
 
 
@@ -371,7 +371,7 @@ def delete_page(request, page_id):
 
   page.delete()
 
-  url = urlresolvers.reverse('views.admin.index')
+  url = urlresolvers.reverse('admin-index')
   return http.HttpResponseRedirect(url)
 
 
@@ -468,7 +468,7 @@ def add_to_group(_request, group_id, email):
   group.users.append(user_key)
   group.put()
 
-  url = urlresolvers.reverse('views.admin.edit_user', args=[email])
+  url = urlresolvers.reverse('admin-edit-user', args=[email])
   return http.HttpResponseRedirect(url)
 
 
@@ -493,7 +493,7 @@ def remove_from_group(_request, group_id, email):
   group.users.remove(user_key)
   group.put()
 
-  url = urlresolvers.reverse('views.admin.edit_user', args=[email])
+  url = urlresolvers.reverse('admin-edit-user', args=[email])
   return http.HttpResponseRedirect(url)
 
 
@@ -528,7 +528,7 @@ def edit_group(request, group_id):
     group = models.UserGroup.get_by_id(int(group_id))
   return utility.edit_instance(request, models.UserGroup, forms.GroupEditForm,
                                'admin/edit_group',
-                               urlresolvers.reverse('views.admin.list_groups'),
+                               urlresolvers.reverse('admin-list-groups'),
                                group_id, group=group)
 
 
@@ -547,7 +547,7 @@ def delete_group(_request, group_id):
   group = models.UserGroup.get_by_id(int(group_id))
   group.delete()
 
-  url = urlresolvers.reverse('views.admin.list_groups')
+  url = urlresolvers.reverse('admin-list-groups')
   return http.HttpResponseRedirect(url)
 
 
@@ -565,7 +565,7 @@ def edit_user(request, email):
   """
   if not email:
     if request.POST and request.POST['email']:
-      url = urlresolvers.reverse('views.admin.edit_user',
+      url = urlresolvers.reverse('admin-edit-user',
                                  args=[request.POST['email']])
       return http.HttpResponseRedirect(url)
     else:
@@ -579,7 +579,7 @@ def edit_user(request, email):
 
   return utility.edit_instance(request, models.UserProfile, forms.UserEditForm,
                                'admin/edit_user',
-                               urlresolvers.reverse('views.admin.index'),
+                               urlresolvers.reverse('admin-index'),
                                profile.key().id(), title=title, profile=profile)
 
 
@@ -615,7 +615,7 @@ def bulk_edit_users(request):
     if not models.UserProfile.update(email, is_superuser == '1'):
       logging.warning('Could not update user %r' % email)
 
-  url = urlresolvers.reverse('views.admin.index')
+  url = urlresolvers.reverse('admin-index')
   return http.HttpResponseRedirect(url)
 
 
@@ -658,7 +658,7 @@ def add_to_sidebar(_request, page_id):
   page = models.Page.get_by_id(int(page_id))
   models.Sidebar.add_page(page)
   return http.HttpResponseRedirect(
-      urlresolvers.reverse('views.admin.edit_sidebar'))
+      urlresolvers.reverse('admin-edit-sidebar'))
 
 
 @super_user_required
@@ -694,7 +694,7 @@ def edit_sidebar(request):
                              {'yaml': yaml_data,
                               'error_message': error_message})
 
-    return http.HttpResponseRedirect(urlresolvers.reverse('views.admin.index'))
+    return http.HttpResponseRedirect(urlresolvers.reverse('admin-index'))
 
   else:
     yaml_data = ''
@@ -716,7 +716,7 @@ def flush_memcache_info(_request):
   """
   utility.clear_memcache()
   return http.HttpResponseRedirect(
-      urlresolvers.reverse('views.admin.display_memcache_info'))
+      urlresolvers.reverse('admin-display-memcache-info'))
 
 
 @admin_required

@@ -29,8 +29,8 @@
 {% block right_column %}
 {% if is_editor %}
 	<ul class="submenu1">
-		<li><a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a></li>
-		<li><a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a></li>
+		<li><a href="{% url admin-edit-page page.key.id %}">{% trans "Edit page" %}</a></li>
+		<li><a href="{% url admin-new-page page.key.id %}">{% trans "Add child" %}</a></li>
 	</ul>
 	{% if files %}
 	    <h1>{% trans "Attached files" %}:</h1>
@@ -40,7 +40,7 @@
 	      {% if file.url %}
 	        <a href="{{ file.url }}">
 	      {% else %}
-	        <a href="{% url views.main.get_url file.path %}">
+	        <a href="{% url get-url file.path %}">
 	      {% endif %}
 	          {{ file.name }}</a>
 	      </li>

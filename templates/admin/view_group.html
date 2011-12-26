@@ -3,7 +3,7 @@
 {% block content %}
 <br />
 {% for user in users %}
-<a href="{% url views.admin.edit_user user.email %}">{{ user.email }}</a>
+<a href="{% url admin-edit-user user.email %}">{{ user.email }}</a>
 <br />
 {% endfor %}
 

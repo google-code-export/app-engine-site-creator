@@ -116,7 +116,7 @@ def edit_updated_page(page_id, message_id='', tab_name=''):
     A http redirect to the edit form for page_id
 
   """
-  url = urlresolvers.reverse('views.admin.edit_page', args=[str(page_id)])
+  url = urlresolvers.reverse('admin-edit-page', args=[str(page_id)])
   if message_id:
     url = '%s?m=%s' % (url, message_id)
   if tab_name:

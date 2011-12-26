@@ -32,10 +32,10 @@
 			<div class="rightbox_wrapper">
 				<div class="rightbox">
 					<div class="product_wrapper">
-						<a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a>
+						<a href="{% url admin-edit-page page.key.id %}">{% trans "Edit page" %}</a>
 					</div>
 					<div class="product_wrapper">
-						<a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a>
+						<a href="{% url admin-new-page page.key.id %}">{% trans "Add child" %}</a>
 					</div>
 					{% if files %}
 					<div class="product_wrapper">
@@ -46,7 +46,7 @@
 					      {% if file.url %}
 					        <a href="{{ file.url }}">
 					      {% else %}
-					        <a href="{% url views.main.get_url file.path %}">
+					        <a href="{% url get-url file.path %}">
 					      {% endif %}
 					          {{ file.name }}</a>
 					    {% endfor %}

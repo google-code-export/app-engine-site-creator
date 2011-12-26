@@ -14,14 +14,14 @@
 {% block content %}
 
 {% if group %}
-  <a href="{% url views.admin.delete_group group.key.id %}">{% trans "Delete Group" %}</a>
+  <a href="{% url admin-delete-group group.key.id %}">{% trans "Delete Group" %}</a>
   <br /><br />
 {% endif %}
 
 
 <h1>{% trans "Group Information" %}:</h1>
 
-<form action="{% if group %}{% url views.admin.edit_group group.key.id %}{% else %}{% url views.admin.new_group %}{% endif %}"
+<form action="{% if group %}{% url admin-edit-group group.key.id %}{% else %}{% url admin-new-group %}{% endif %}"
       method="post">
   <table cellpadding="5">
   {% for field in form %}

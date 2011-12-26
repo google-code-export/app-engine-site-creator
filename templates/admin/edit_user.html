@@ -39,7 +39,7 @@
     <ul>
     {% for group in profile.groups %}
       <li>
-        {{ group.name }} - <a href="{% url views.admin.remove_from_group group.key.id,profile.email %}">{% trans "Remove" %}</a>
+        {{ group.name }} - <a href="{% url admin-remove-from-group group.key.id,profile.email %}">{% trans "Remove" %}</a>
       </li>
     {% endfor %}
     </ul>
@@ -50,7 +50,7 @@
   <div>
     {% trans "Add user to group" %}: <select id="group_select">
     {% for group in profile.groups_not_in %}
-      <option value="{% url views.admin.add_to_group group.key.id,profile.email %}">{{ group.name }}</option>
+      <option value="{% url admin-add-to-group group.key.id,profile.email %}">{{ group.name }}</option>
     {% endfor %}
     </select>
     <input type="button" onclick="addToGroup();" value="{% trans "Add" %}" />

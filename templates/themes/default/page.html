@@ -10,8 +10,8 @@
   <div id="pageTitle">{{ page.title|escape }}</div>
   {% if is_editor %}
     <div id="editPageLink">
-      <a href="{% url views.admin.edit_page page.key.id %}">{% trans "Edit page" %}</a> |
-      <a href="{% url views.admin.new_page page.key.id %}">{% trans "Add child" %}</a>
+      <a href="{% url admin-edit-page page.key.id %}">{% trans "Edit page" %}</a> |
+      <a href="{% url admin-new-page page.key.id %}">{% trans "Add child" %}</a>
     </div>
   {% endif %}
 {% endblock %}
@@ -42,7 +42,7 @@
       {% if file.url %}
         <a href="{{ file.url }}">
       {% else %}
-        <a href="{% url views.main.get_url file.path %}">
+        <a href="{% url get-url file.path %}">
       {% endif %}
           {{ file.name }}</a>
     {% endfor %}

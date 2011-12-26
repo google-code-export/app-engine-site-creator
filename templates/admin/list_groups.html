@@ -9,7 +9,7 @@
 {% for group in groups %}
   <li>
     <b>{{ group.name|escape }}</b> -
-    <a href="{% url views.admin.edit_group group.key.id %}">{% trans "edit" %}</a>
+    <a href="{% url admin-edit-group group.key.id %}">{% trans "edit" %}</a>
     <br />
     {{ group.description|escape }}
   </li>
@@ -17,7 +17,7 @@
 </ul>
 
 <p>
-  <a href="{% url views.admin.new_group %}">{% trans "Create a new group" %}</a>
+  <a href="{% url admin-new-group %}">{% trans "Create a new group" %}</a>
 </p>
 
 {% endblock %}

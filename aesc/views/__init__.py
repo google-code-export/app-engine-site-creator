@@ -14,27 +14,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-"""Django settings for app-engine-site-creator project."""
-
-import os
-
-APPEND_SLASH = False
-DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
-LANGUAGE_CODE = 'en-us'
-MIDDLEWARE_CLASSES = (
-    'aesc.middleware.AddUserToRequestMiddleware',
-)
-ROOT_PATH = os.path.dirname(__file__)
-ROOT_URLCONF = 'urls'
-TEMPLATE_DEBUG = DEBUG
-TEMPLATE_CONTEXT_PROCESSORS = ()
-TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'templates'),
-)
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-)
-INSTALLED_APPS = (
-    'aesc',
-)

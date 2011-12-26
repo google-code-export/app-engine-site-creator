@@ -10,9 +10,9 @@
   {% for page in pages %}
   <li style="padding-bottom:10px;">
     <b>{{page.title|escape}}</b> -
-    <a href="{% url views.main.get_url page.path %}">{% trans "view" %}</a> -
-    <a href="{% url views.admin.edit_page page.key.id %}">{% trans "edit" %}</a> -
-    <a href="{% url views.admin.new_page page.key.id %}">{% trans "add child" %}</a>
+    <a href="{% url get-url page.path %}">{% trans "view" %}</a> -
+    <a href="{% url admin-edit-page page.key.id %}">{% trans "edit" %}</a> -
+    <a href="{% url admin-new-page page.key.id %}">{% trans "add child" %}</a>
     <br>
     <span style="font-size:10pt">
       <span style="color:green;">

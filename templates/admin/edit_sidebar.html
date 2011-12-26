@@ -8,7 +8,7 @@
 {% if error_message %}
 {{ error_message }}
 {% endif %}
-<form action="{% url views.admin.edit_sidebar %}" method="post">
+<form action="{% url admin-edit-sidebar %}" method="post">
   <textarea rows="25" cols="70" name="yaml">{{ yaml }}</textarea>
   <br>
   <input type="submit" value="{% trans "Save" %}">

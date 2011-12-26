@@ -19,11 +19,9 @@
 
 import logging
 
-from django import http
 from google.appengine.api import users
 
 import models
-import utility
 
 
 class AddUserToRequestMiddleware(object):

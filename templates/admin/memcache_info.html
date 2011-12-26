@@ -10,5 +10,5 @@
 <div>{% trans "Bytes" %}: {{ memcache_info.bytes }}</div>
 <div>{% trans "Oldest Item Age" %}: {{ memcache_info.oldest_item_age }}</div>
 
-<div><a href="{% url views.admin.flush_memcache_info %}">{% trans "Flush Memcache" %}</a></div>
+<div><a href="{% url admin-flush-memcache-info %}">{% trans "Flush Memcache" %}</a></div>
 {% endblock %}

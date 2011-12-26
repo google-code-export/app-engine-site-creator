@@ -4,14 +4,14 @@
 
 {% block content %}
 <br />
-<a href="{% url views.admin.view_group None %}">{% trans "Show All" %}</a>
+<a href="{% url admin-view-group None %}">{% trans "Show All" %}</a>
 <br />
 <br />
 {% trans "Filter by group" %}:
 <ul>
 {% for group in groups %}
 <li>
-  <a href="{% url views.admin.view_group group.key.id %}">{{ group.name }}</a>
+  <a href="{% url admin-view-group group.key.id %}">{{ group.name }}</a>
 </li>
 {% endfor %}
 </ul>

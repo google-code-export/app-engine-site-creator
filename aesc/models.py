@@ -654,7 +654,7 @@ class Sidebar(db.Model):
         page = Page.get_by_id(int(item['id']))
         if not page or not page.user_can_read(profile):
           continue
-        url = urlresolvers.reverse('views.main.get_url', args=[page.path])
+        url = urlresolvers.reverse('get-url', args=[page.path])
         section_html.append('<li><a href="%s">%s</a></li>\n' %
                             (url, item['title']))
 
