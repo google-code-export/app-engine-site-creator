@@ -93,6 +93,11 @@
       CKEDITOR.replace( 'editorHtml',
         {
           customConfig : '/static/js/ckeditor_config.js',
+          {% if page.key.id %}
+            filebrowserBrowseUrl : '{% url views.admin.filebrowser page.key.id %}',
+            filebrowserImageBrowseUrl : '{% url views.admin.filebrowser page.key.id %}?Type=Image',
+            filebrowserFlashBrowseUrl : '{% url views.admin.filebrowser page.key.id %}?Type=Flash',
+          {% endif %}
           height : 298,
           toolbar: 'AESC_Toolbar'
         });

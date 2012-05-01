@@ -347,6 +347,54 @@ def delete_file(request, page_id, file_id):
     return utility.page_not_found(request)
 
 
+def filebrowser(request, page_id):
+  """File Browser for CKEditor.
+
+  The File Browser simplifies including images on the page by select file from
+  list by one-click.
+
+  Args:
+    request: The request object
+    page_id: ID of the page that attached files are listing
+
+  Returns:
+    A Django HttpResponse object.
+
+  """
+
+  if page_id:
+    page = models.Page.get_by_id(int(page_id))
+
+    if not page:
+      return utility.page_not_found(request)
+
+    if not page.user_can_write(request.profile):
+      return utility.forbidden(request)
+
+    files = page.attached_files()
+
+    if request.GET.get('Type') == 'Image':
+      files = [item for item in files
+               if item.name.lower().split('.')[-1]
+               in ('jpg', 'gif', 'jpeg', 'png', 'bmp', 'webp')]
+
+    if request.GET.get('Type') == 'Flash':
+      files = [item for item in files
+               if item.name.lower().split('.')[-1]
+               in ('swf', 'flv')]
+
+    for item in files:
+      ext = item.name.lower().split('.')[-1]
+      item.icon = '/static/images/fileicons/%s.png' % ext
+
+    return utility.respond(request, 'admin/filebrowser',
+                           {'files': files,
+                            'funcNum': request.GET.get('CKEditorFuncNum')})
+
+  else:
+    return utility.page_not_found(request)
+
+
 def delete_page(request, page_id):
   """Removes a page from the database.
 

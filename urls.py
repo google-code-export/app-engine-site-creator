@@ -45,6 +45,7 @@ urlpatterns = defaults.patterns(
     (r'^admin/download/([\w\-]+).html$', 'admin.download_page_html'),
     (r'^admin/addfile/$', 'admin.upload_file'),
     (r'^admin/deletefile/([\w\-]+)/([^\s/]+)$', 'admin.delete_file'),
+    (r'^admin/filebrowser/(\d+)/$', 'admin.filebrowser'),
     (r'^admin/help/$', 'admin.get_help'),
     (r'^admin/memcache_info/$', 'admin.display_memcache_info'),
     (r'^admin/memcache_info/flush/$', 'admin.flush_memcache_info'),

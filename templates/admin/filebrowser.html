@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+
+{% load i18n %}
+
+<html>
+  <head>
+    <title>{% trans "File Browser" %}</title>
+
+    <style type="text/css">
+      @import "/static/css/default.css";
+
+      li {
+        background-repeat:no-repeat;
+        background-position: center left;
+        text-indent: 20px;
+        padding: 2px;
+      }
+
+      li:hover { background-color: #f5f5f5; }
+      
+      ul {
+        list-style-type:none;
+        padding: 0;
+      }
+    </style>
+
+    <script type="text/javascript">
+      function SelectFile(fileUrl)
+      {
+        window.opener.CKEDITOR.tools.callFunction({{ funcNum }}, fileUrl);
+        window.close();
+      }
+    </script>
+  </head>
+
+<body class="tundra">
+  <ul>
+    {% for file in files %}
+      {% url views.main.get_url file.path as file_path %}
+        <li style="background-image:url({{file.icon}})" onclick="SelectFile('{% firstof file.url file_path %}');">
+          {{ file.name }}
+        </li>
+    {% endfor %}
+  </ul>
+
+</body>
+</html>
